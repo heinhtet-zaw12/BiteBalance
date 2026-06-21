@@ -25,7 +25,6 @@ class FoodLogModel extends FoodLog {
 
   Map<String, dynamic> toJson() {
     return {
-      'id': id,
       'user_id': userId,
       'food_name': foodName,
       'calories': calories,

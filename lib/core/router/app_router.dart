@@ -1,9 +1,12 @@
+import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bite_balance/features/analytics/presentation/pages/analytics_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/login_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/register_page.dart';
 import 'package:bite_balance/features/dashboard/presentation/pages/dashboard_page.dart';
 import 'package:bite_balance/features/food_log/presentation/pages/food_log_page.dart';
+import 'package:bite_balance/features/main/presentation/pages/main_scaffold.dart';
 import 'package:bite_balance/features/profile/presentation/pages/home_page.dart';
 import 'package:bite_balance/features/profile/presentation/pages/profile_setup_page.dart';
 import 'package:bite_balance/features/splash/presentation/pages/splash_page.dart';
@@ -23,9 +26,28 @@ final GoRouter appRouter = GoRouter(
       path: '/register',
       builder: (context, state) => const RegisterPage(),
     ),
-    GoRoute(
-      path: '/home',
-      builder: (context, state) => const HomePage(),
+    ShellRoute(
+      builder: (context, state, child) => MainScaffold(child: child),
+      routes: [
+        GoRoute(
+          path: '/home',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: HomePage(),
+          ),
+        ),
+        GoRoute(
+          path: '/dashboard',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: DashboardPage(),
+          ),
+        ),
+        GoRoute(
+          path: '/analytics',
+          pageBuilder: (context, state) => const NoTransitionPage(
+            child: AnalyticsPage(),
+          ),
+        ),
+      ],
     ),
     GoRoute(
       path: '/profile-setup',
@@ -34,10 +56,6 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/food-log',
       builder: (context, state) => const FoodLogPage(),
-    ),
-    GoRoute(
-      path: '/dashboard',
-      builder: (context, state) => const DashboardPage(),
     ),
   ],
 );

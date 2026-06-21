@@ -22,9 +22,10 @@ class FoodLogRepositoryImpl implements FoodLogRepository {
   }
 
   @override
-  Future<Either<Failure, List<FoodLog>>> getDailyLogs(DateTime date) async {
+  Future<Either<Failure, List<FoodLog>>> getDailyLogs(
+      String userId, DateTime date) async {
     try {
-      final logs = await remoteDataSource.getDailyLogs(date);
+      final logs = await remoteDataSource.getDailyLogs(userId, date);
       return Right(logs);
     } catch (e) {
       return Left(ServerFailure(e.toString()));
@@ -32,9 +33,10 @@ class FoodLogRepositoryImpl implements FoodLogRepository {
   }
 
   @override
-  Future<Either<Failure, void>> deleteFoodLog(String id) async {
+  Future<Either<Failure, void>> deleteFoodLog(
+      String userId, String id) async {
     try {
-      await remoteDataSource.deleteFoodLog(id);
+      await remoteDataSource.deleteFoodLog(userId, id);
       return const Right(null);
     } catch (e) {
       return Left(ServerFailure(e.toString()));

@@ -1,4 +1,5 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/dashboard/domain/entities/daily_summary.dart';
 import 'package:bite_balance/features/dashboard/domain/usecases/get_daily_summary.dart';
 import 'package:bite_balance/features/food_log/presentation/providers/food_log_provider.dart';
@@ -14,12 +15,15 @@ class DashboardNotifier extends AsyncNotifier<DailySummary?> {
   }
 
   Future<void> loadSummary({DateTime? date}) async {
+    final user = ref.read(authRepositoryProvider).currentUser;
+    if (user == null) return;
+
     final targetDate = date ?? DateTime.now();
     state = const AsyncValue.loading();
 
     state = await AsyncValue.guard(() async {
       final result = await ref.read(getDailySummaryProvider)(
-        GetDailySummaryParams(date: targetDate),
+        GetDailySummaryParams(userId: user.id, date: targetDate),
       );
       return result.fold(
         (failure) => throw Exception(failure.message),

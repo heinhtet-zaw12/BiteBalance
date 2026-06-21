@@ -3,8 +3,11 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:bite_balance/features/food_log/presentation/providers/food_log_provider.dart';
 import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
 import 'package:bite_balance/features/profile/presentation/widgets/bmi_card.dart';
+import 'package:bite_balance/features/profile/presentation/widgets/calorie_target_card.dart';
+import 'package:bite_balance/features/profile/presentation/widgets/remaining_calories_card.dart';
 
 class HomePage extends ConsumerWidget {
   const HomePage({super.key});
@@ -13,6 +16,25 @@ class HomePage extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final profileState = ref.watch(profileProvider);
     final calculateBmi = ref.read(calculateBmiProvider);
+    final calorieRecommendationState = ref.watch(calorieRecommendationProvider);
+    final dailyLogsState = ref.watch(dailyLogsProvider);
+
+    // Load calorie recommendation when profile is available
+    ref.listen(profileProvider, (previous, next) {
+      next.whenData((profile) {
+        if (profile != null &&
+            profile.weight != null &&
+            profile.height != null &&
+            profile.goal != null) {
+          ref.read(calorieRecommendationProvider.notifier).loadRecommendation(
+                weightKg: profile.weight!,
+                heightCm: profile.height!,
+                goal: profile.goal!,
+              );
+          ref.read(dailyLogsProvider.notifier).loadLogs(DateTime.now());
+        }
+      });
+    });
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -142,6 +164,56 @@ class HomePage extends ConsumerWidget {
                     calculateBmi: calculateBmi,
                   ),
                   const SizedBox(height: 16),
+
+                  // Calorie Recommendation Cards
+                  calorieRecommendationState.when(
+                    loading: () => const Card(
+                      child: Padding(
+                        padding: EdgeInsets.all(24),
+                        child: Center(
+                          child: Column(
+                            children: [
+                              CircularProgressIndicator(),
+                              SizedBox(height: 16),
+                              Text('Calculating your calorie target...'),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+                    error: (error, _) => const SizedBox.shrink(),
+                    data: (recommendation) {
+                      if (recommendation == null) {
+                        return const SizedBox.shrink();
+                      }
+
+                      final caloriesConsumed = dailyLogsState.maybeWhen(
+                        data: (logs) => logs.fold<double>(
+                          0,
+                          (sum, log) => sum + log.calories,
+                        ),
+                        orElse: () => 0.0,
+                      );
+
+                      return Column(
+                        children: [
+                          CalorieTargetCard(
+                            dailyCalorieTarget:
+                                recommendation.dailyCalorieTarget,
+                            healthyRatio: recommendation.healthyRatio,
+                            reasoning: recommendation.reasoning,
+                          ),
+                          const SizedBox(height: 16),
+                          RemainingCaloriesCard(
+                            caloriesConsumed: caloriesConsumed,
+                            calorieTarget:
+                                recommendation.dailyCalorieTarget,
+                          ),
+                          const SizedBox(height: 16),
+                        ],
+                      );
+                    },
+                  ),
 
                   // Goal Card
                   Card(

@@ -11,12 +11,13 @@ class GetDailyLogs implements UseCase<List<FoodLog>, GetDailyLogsParams> {
 
   @override
   Future<Either<Failure, List<FoodLog>>> call(GetDailyLogsParams params) {
-    return repository.getDailyLogs(params.date);
+    return repository.getDailyLogs(params.userId, params.date);
   }
 }
 
 class GetDailyLogsParams {
+  final String userId;
   final DateTime date;
 
-  const GetDailyLogsParams({required this.date});
+  const GetDailyLogsParams({required this.userId, required this.date});
 }

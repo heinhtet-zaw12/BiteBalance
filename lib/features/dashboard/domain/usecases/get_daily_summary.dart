@@ -11,7 +11,7 @@ class GetDailySummary implements UseCase<DailySummary, GetDailySummaryParams> {
 
   @override
   Future<Either<Failure, DailySummary>> call(GetDailySummaryParams params) async {
-    final result = await repository.getDailyLogs(params.date);
+    final result = await repository.getDailyLogs(params.userId, params.date);
 
     return result.fold(
       (failure) => Left(failure),
@@ -24,7 +24,8 @@ class GetDailySummary implements UseCase<DailySummary, GetDailySummaryParams> {
 }
 
 class GetDailySummaryParams {
+  final String userId;
   final DateTime date;
 
-  const GetDailySummaryParams({required this.date});
+  const GetDailySummaryParams({required this.userId, required this.date});
 }

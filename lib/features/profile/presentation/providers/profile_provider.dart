@@ -1,11 +1,15 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/profile/data/datasources/profile_remote_datasource.dart';
+import 'package:bite_balance/features/profile/data/datasources/gemini_calorie_datasource.dart';
 import 'package:bite_balance/features/profile/data/repositories/profile_repository_impl.dart';
 import 'package:bite_balance/features/profile/domain/entities/profile.dart';
+import 'package:bite_balance/features/profile/domain/entities/calorie_recommendation.dart';
 import 'package:bite_balance/features/profile/domain/repositories/profile_repository.dart';
 import 'package:bite_balance/features/profile/domain/usecases/calculate_bmi.dart';
+import 'package:bite_balance/features/profile/domain/usecases/get_calorie_recommendation.dart';
 import 'package:bite_balance/features/profile/domain/usecases/get_profile.dart';
 import 'package:bite_balance/features/profile/domain/usecases/save_profile.dart';
 
@@ -99,3 +103,46 @@ class ProfileNotifier extends AsyncNotifier<Profile?> {
 final profileProvider = AsyncNotifierProvider<ProfileNotifier, Profile?>(
   ProfileNotifier.new,
 );
+
+// Gemini calorie data source provider
+final geminiCalorieDataSourceProvider = Provider<GeminiCalorieDataSource>((ref) {
+  return GeminiCalorieDataSourceImpl(dotenv.get('GEMINI_API_KEY'));
+});
+
+// Get calorie recommendation use case provider
+final getCalorieRecommendationProvider = Provider<GetCalorieRecommendation>((ref) {
+  return GetCalorieRecommendation(ref.read(geminiCalorieDataSourceProvider));
+});
+
+// Calorie recommendation state notifier
+class CalorieRecommendationNotifier extends AsyncNotifier<CalorieRecommendation?> {
+  @override
+  Future<CalorieRecommendation?> build() async {
+    return null;
+  }
+
+  Future<void> loadRecommendation({
+    required double weightKg,
+    required double heightCm,
+    required String goal,
+  }) async {
+    state = const AsyncValue.loading();
+    state = await AsyncValue.guard(() async {
+      final result = await ref.read(getCalorieRecommendationProvider)(
+        GetCalorieRecommendationParams(
+          weightKg: weightKg,
+          heightCm: heightCm,
+          goal: goal,
+        ),
+      );
+      return result.fold(
+        (failure) => throw Exception(failure.message),
+        (recommendation) => recommendation,
+      );
+    });
+  }
+}
+
+final calorieRecommendationProvider =
+    AsyncNotifierProvider<CalorieRecommendationNotifier, CalorieRecommendation?>(
+        CalorieRecommendationNotifier.new);

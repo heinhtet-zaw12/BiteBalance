@@ -1,13 +1,16 @@
+import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/food_log/data/datasources/food_log_remote_datasource.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
+import 'package:bite_balance/features/food_log/data/datasources/gemini_vision_datasource.dart';
 import 'package:bite_balance/features/food_log/data/repositories/food_log_repository_impl.dart';
 import 'package:bite_balance/features/food_log/domain/entities/food_log.dart';
 import 'package:bite_balance/features/food_log/domain/repositories/food_log_repository.dart';
 import 'package:bite_balance/features/food_log/domain/usecases/analyze_food.dart';
+import 'package:bite_balance/features/food_log/domain/usecases/analyze_food_image.dart';
 import 'package:bite_balance/features/food_log/domain/usecases/get_daily_logs.dart';
 import 'package:bite_balance/features/food_log/domain/usecases/log_food.dart';
 
@@ -18,6 +21,10 @@ final foodLogRemoteDataSourceProvider = Provider<FoodLogRemoteDataSource>((ref) 
 
 final geminiDataSourceProvider = Provider<GeminiDataSource>((ref) {
   return GeminiDataSourceImpl(dotenv.get('GEMINI_API_KEY'));
+});
+
+final geminiVisionDataSourceProvider = Provider<GeminiVisionDataSource>((ref) {
+  return GeminiVisionDataSourceImpl(dotenv.get('GEMINI_API_KEY'));
 });
 
 // Repository provider
@@ -36,6 +43,10 @@ final getDailyLogsProvider = Provider<GetDailyLogs>((ref) {
 
 final analyzeFoodProvider = Provider<AnalyzeFood>((ref) {
   return AnalyzeFood(ref.read(geminiDataSourceProvider));
+});
+
+final analyzeFoodImageProvider = Provider<AnalyzeFoodImage>((ref) {
+  return AnalyzeFoodImage(ref.read(geminiVisionDataSourceProvider));
 });
 
 // Food log state
@@ -77,6 +88,25 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
 
     final result = await ref.read(analyzeFoodProvider)(
       AnalyzeFoodParams(foodDescription: foodDescription),
+    );
+
+    result.fold(
+      (failure) => state = state.copyWith(
+        isAnalyzing: false,
+        error: failure.message,
+      ),
+      (analysis) => state = state.copyWith(
+        isAnalyzing: false,
+        analysis: analysis,
+      ),
+    );
+  }
+
+  Future<void> analyzeFoodImage(File imageFile) async {
+    state = state.copyWith(isAnalyzing: true, error: null, analysis: null);
+
+    final result = await ref.read(analyzeFoodImageProvider)(
+      AnalyzeFoodImageParams(imageFile: imageFile),
     );
 
     result.fold(
@@ -142,10 +172,13 @@ class DailyLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   }
 
   Future<void> loadLogs(DateTime date) async {
+    final user = ref.read(authRepositoryProvider).currentUser;
+    if (user == null) return;
+
     state = const AsyncValue.loading();
     state = await AsyncValue.guard(() async {
       final result = await ref.read(getDailyLogsProvider)(
-        GetDailyLogsParams(date: date),
+        GetDailyLogsParams(userId: user.id, date: date),
       );
       return result.fold(
         (failure) => throw Exception(failure.message),

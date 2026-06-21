@@ -1,6 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
 import 'package:bite_balance/features/food_log/presentation/providers/food_log_provider.dart';
 
@@ -13,7 +15,9 @@ class FoodLogPage extends ConsumerStatefulWidget {
 
 class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   final _foodController = TextEditingController();
+  final _imagePicker = ImagePicker();
   String _selectedMealType = 'lunch';
+  File? _selectedImage;
 
   @override
   void dispose() {
@@ -21,12 +25,22 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     super.dispose();
   }
 
+  Future<void> _pickFromGallery() async {
+    final image = await _imagePicker.pickImage(
+      source: ImageSource.gallery,
+      imageQuality: 80,
+    );
+    if (image != null) {
+      setState(() => _selectedImage = File(image.path));
+    }
+  }
+
   Future<void> _analyzeFood() async {
     final food = _foodController.text.trim();
-    if (food.isEmpty) {
+    if (food.isEmpty && _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: const Text('Please enter a food description'),
+          content: const Text('Enter food description or take a photo'),
           behavior: SnackBarBehavior.floating,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
@@ -35,7 +49,12 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       );
       return;
     }
-    await ref.read(foodLogProvider.notifier).analyzeFood(food);
+
+    if (_selectedImage != null) {
+      await ref.read(foodLogProvider.notifier).analyzeFoodImage(_selectedImage!);
+    } else {
+      await ref.read(foodLogProvider.notifier).analyzeFood(food);
+    }
   }
 
   Future<void> _saveFoodLog() async {
@@ -54,6 +73,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       );
       context.pop();
     }
+  }
+
+  void _clearImage() {
+    setState(() => _selectedImage = null);
   }
 
   @override
@@ -100,7 +123,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Describe your meal and let AI analyze it',
+                    'Describe your meal or upload a photo',
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           color: Colors.white70,
                         ),
@@ -109,6 +132,70 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               ),
             ),
             const SizedBox(height: 24),
+
+            // Photo Section
+            if (_selectedImage != null) ...[
+              // Image Preview
+              Stack(
+                children: [
+                  ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.file(
+                      _selectedImage!,
+                      height: 200,
+                      width: double.infinity,
+                      fit: BoxFit.cover,
+                    ),
+                  ),
+                  Positioned(
+                    top: 8,
+                    right: 8,
+                    child: GestureDetector(
+                      onTap: _clearImage,
+                      child: Container(
+                        padding: const EdgeInsets.all(6),
+                        decoration: BoxDecoration(
+                          color: Colors.black54,
+                          borderRadius: BorderRadius.circular(20),
+                        ),
+                        child: const Icon(
+                          Icons.close,
+                          color: Colors.white,
+                          size: 20,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ] else ...[
+              // Gallery Button
+              _buildPhotoButton(
+                icon: Icons.photo_library_rounded,
+                label: 'Pick from Gallery',
+                onTap: _pickFromGallery,
+              ),
+              const SizedBox(height: 16),
+
+              // Divider with "OR"
+              Row(
+                children: [
+                  const Expanded(child: Divider()),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Text(
+                      'OR',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ),
+                  const Expanded(child: Divider()),
+                ],
+              ),
+              const SizedBox(height: 16),
+            ],
 
             // Food Input
             TextFormField(
@@ -136,8 +223,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               children: [
                 _buildMealChip(
                     'breakfast', 'Breakfast', Icons.free_breakfast_rounded),
-                _buildMealChip(
-                    'lunch', 'Lunch', Icons.lunch_dining_rounded),
+                _buildMealChip('lunch', 'Lunch', Icons.lunch_dining_rounded),
                 _buildMealChip(
                     'dinner', 'Dinner', Icons.dinner_dining_rounded),
                 _buildMealChip('snack', 'Snack', Icons.cookie_rounded),
@@ -160,8 +246,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                         ),
                       )
                     : const Icon(Icons.auto_awesome),
-                label:
-                    Text(foodLogState.isAnalyzing ? 'Analyzing...' : 'Analyze'),
+                label: Text(
+                    foodLogState.isAnalyzing ? 'Analyzing...' : 'Analyze'),
               ),
             ),
             const SizedBox(height: 24),
@@ -230,6 +316,44 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 ),
               ),
             ],
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildPhotoButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 24),
+        decoration: BoxDecoration(
+          color: AppTheme.primary.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: AppTheme.primary.withValues(alpha: 0.2),
+            width: 1.5,
+          ),
+        ),
+        child: Column(
+          children: [
+            Icon(
+              icon,
+              color: AppTheme.primary,
+              size: 32,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    color: AppTheme.primary,
+                  ),
+            ),
           ],
         ),
       ),
