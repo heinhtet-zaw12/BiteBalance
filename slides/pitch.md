@@ -15,7 +15,6 @@ People who want to eat healthier but has no easy way to track daily food intake 
 
 <!-- slide 2 -->
 # Their problem
-
 - No easy way to track daily calories
 - Can't tell healthy food from junk food
 - No personalized targets based on their BMI
