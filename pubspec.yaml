@@ -41,6 +41,8 @@ dependencies:
   pretty_dio_logger: ^1.4.0
   fpdart: ^1.1.0
   google_fonts: ^6.2.1
+  google_generative_ai: ^0.4.6
+  fl_chart: ^0.70.2
 
 dev_dependencies:
   flutter_test:
