@@ -46,4 +46,4 @@ app.*.map.json
 
 # Environment & MCP
 .env
-.mcp.json
+
