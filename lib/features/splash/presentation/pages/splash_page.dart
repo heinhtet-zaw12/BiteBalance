@@ -11,40 +11,69 @@ class SplashPage extends StatefulWidget {
 }
 
 class _SplashPageState extends State<SplashPage>
-    with SingleTickerProviderStateMixin {
-  late AnimationController _controller;
-  late Animation<double> _fadeAnimation;
-  late Animation<double> _scaleAnimation;
+    with TickerProviderStateMixin {
+  late final AnimationController _logoController;
+  late final AnimationController _textController;
+  late final Animation<double> _fadeAnimation;
+  late final Animation<double> _scaleAnimation;
+  late final Animation<double> _textFadeAnimation;
+  late final Animation<Offset> _textSlideAnimation;
 
   @override
   void initState() {
     super.initState();
-    _controller = AnimationController(
-      duration: const Duration(milliseconds: 1500),
+
+    _logoController = AnimationController(
+      duration: const Duration(milliseconds: 1000),
+      vsync: this,
+    );
+
+    _textController = AnimationController(
+      duration: const Duration(milliseconds: 800),
       vsync: this,
     );
 
     _fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
       CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeIn),
+        parent: _logoController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeIn),
       ),
     );
 
-    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.0).animate(
+    _scaleAnimation = Tween<double>(begin: 0.6, end: 1.0).animate(
       CurvedAnimation(
-        parent: _controller,
-        curve: const Interval(0.0, 0.5, curve: Curves.easeOutBack),
+        parent: _logoController,
+        curve: const Interval(0.0, 0.6, curve: Curves.easeOutBack),
       ),
     );
 
-    _controller.forward();
+    _textFadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _textController,
+        curve: Curves.easeIn,
+      ),
+    );
+
+    _textSlideAnimation = Tween<Offset>(
+      begin: const Offset(0, 0.3),
+      end: Offset.zero,
+    ).animate(CurvedAnimation(
+      parent: _textController,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _logoController.forward();
+    Future.delayed(const Duration(milliseconds: 400), () {
+      if (mounted) _textController.forward();
+    });
+
     _checkAuth();
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _logoController.dispose();
+    _textController.dispose();
     super.dispose();
   }
 
@@ -67,44 +96,55 @@ class _SplashPageState extends State<SplashPage>
     return Scaffold(
       backgroundColor: AppTheme.background,
       body: Center(
-        child: AnimatedBuilder(
-          animation: _controller,
-          builder: (context, child) {
-            return FadeTransition(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            // Logo with Hero animation
+            FadeTransition(
               opacity: _fadeAnimation,
               child: ScaleTransition(
                 scale: _scaleAnimation,
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 100,
-                      height: 100,
-                      decoration: BoxDecoration(
-                        gradient: const LinearGradient(
-                          colors: [
-                            AppTheme.primary,
-                            AppTheme.secondary,
-                          ],
-                          begin: Alignment.topLeft,
-                          end: Alignment.bottomRight,
-                        ),
-                        borderRadius: BorderRadius.circular(28),
-                        boxShadow: [
-                          BoxShadow(
-                            color: AppTheme.primary.withValues(alpha: 0.3),
-                            blurRadius: 20,
-                            offset: const Offset(0, 10),
-                          ),
+                child: Hero(
+                  tag: 'app_logo',
+                  child: Container(
+                    width: 100,
+                    height: 100,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        colors: [
+                          AppTheme.primary,
+                          AppTheme.secondary,
                         ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
                       ),
-                      child: const Icon(
-                        Icons.restaurant_rounded,
-                        size: 50,
-                        color: Colors.white,
-                      ),
+                      borderRadius: BorderRadius.circular(28),
+                      boxShadow: [
+                        BoxShadow(
+                          color: AppTheme.primary.withValues(alpha: 0.35),
+                          blurRadius: 24,
+                          offset: const Offset(0, 12),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: 24),
+                    child: const Icon(
+                      Icons.restaurant_rounded,
+                      size: 50,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 28),
+
+            // App name
+            FadeTransition(
+              opacity: _textFadeAnimation,
+              child: SlideTransition(
+                position: _textSlideAnimation,
+                child: Column(
+                  children: [
                     Text(
                       'Bite Balance',
                       style: Theme.of(context)
@@ -123,8 +163,22 @@ class _SplashPageState extends State<SplashPage>
                   ],
                 ),
               ),
-            );
-          },
+            ),
+            const SizedBox(height: 48),
+
+            // Loading indicator
+            FadeTransition(
+              opacity: _textFadeAnimation,
+              child: SizedBox(
+                width: 24,
+                height: 24,
+                child: CircularProgressIndicator(
+                  strokeWidth: 2.5,
+                  color: AppTheme.primary.withValues(alpha: 0.5),
+                ),
+              ),
+            ),
+          ],
         ),
       ),
     );

@@ -16,29 +16,58 @@ class JunkFoodBarChart extends StatelessWidget {
     if (topJunkFoods.isEmpty) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(32),
           child: Column(
             children: [
-              Text(
-                'Top Junk Foods',
-                style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.w600,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppTheme.secondary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
                     ),
+                    child: const Icon(
+                      Icons.bar_chart_rounded,
+                      color: AppTheme.secondary,
+                      size: 16,
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  Text(
+                    'Top Junk Foods',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
               ),
-              const SizedBox(height: 40),
-              Icon(
-                Icons.no_food_rounded,
-                size: 48,
-                color: AppTheme.textTertiary,
+              const SizedBox(height: 32),
+              Container(
+                width: 72,
+                height: 72,
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceVariant,
+                  borderRadius: BorderRadius.circular(22),
+                ),
+                child: const Icon(
+                  Icons.no_food_rounded,
+                  size: 36,
+                  color: AppTheme.textTertiary,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
                 'No junk food logged',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      color: AppTheme.textSecondary,
-                    ),
+                style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: 40),
+              const SizedBox(height: 4),
+              Text(
+                'Keep up the healthy eating!',
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
             ],
           ),
         ),
@@ -51,16 +80,35 @@ class JunkFoodBarChart extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Text(
-              'Top Junk Foods',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppTheme.secondary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: const Icon(
+                    Icons.bar_chart_rounded,
+                    color: AppTheme.secondary,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Top Junk Foods',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             SizedBox(
               height: 200,
               child: BarChart(
@@ -73,7 +121,7 @@ class JunkFoodBarChart extends StatelessWidget {
                       getTooltipItem: (group, groupIndex, rod, rodIndex) {
                         return BarTooltipItem(
                           '${topJunkFoods[group.x].foodName}\n',
-                          TextStyle(
+                          const TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.bold,
                             fontSize: 14,
@@ -81,8 +129,8 @@ class JunkFoodBarChart extends StatelessWidget {
                           children: [
                             TextSpan(
                               text: '${rod.toY.toInt()} times',
-                              style: TextStyle(
-                                color: Colors.white,
+                              style: const TextStyle(
+                                color: Colors.white70,
                                 fontSize: 12,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -129,10 +177,10 @@ class JunkFoodBarChart extends StatelessWidget {
                         },
                       ),
                     ),
-                    topTitles: AxisTitles(
+                    topTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
                     ),
-                    rightTitles: AxisTitles(
+                    rightTitles: const AxisTitles(
                       sideTitles: SideTitles(showTitles: false),
                     ),
                   ),
@@ -153,10 +201,17 @@ class JunkFoodBarChart extends StatelessWidget {
                       barRods: [
                         BarChartRodData(
                           toY: topJunkFoods[index].count.toDouble(),
-                          color: AppTheme.secondary,
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppTheme.secondary,
+                              Color(0xFFFFB3C6),
+                            ],
+                            begin: Alignment.bottomCenter,
+                            end: Alignment.topCenter,
+                          ),
                           width: 30,
-                          borderRadius: BorderRadius.vertical(
-                            top: Radius.circular(6),
+                          borderRadius: const BorderRadius.vertical(
+                            top: Radius.circular(8),
                           ),
                         ),
                       ],

@@ -39,12 +39,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final food = _foodController.text.trim();
     if (food.isEmpty && _selectedImage == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Enter food description or take a photo'),
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
+        const SnackBar(
+          content: Text('Enter food description or take a photo'),
         ),
       );
       return;
@@ -65,10 +61,6 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
         SnackBar(
           content: const Text('Food logged successfully!'),
           backgroundColor: AppTheme.success,
-          behavior: SnackBarBehavior.floating,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12),
-          ),
         ),
       );
       context.pop();
@@ -95,7 +87,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           children: [
             // Header Card
             Container(
-              padding: const EdgeInsets.all(24),
+              padding: const EdgeInsets.all(28),
               decoration: BoxDecoration(
                 gradient: const LinearGradient(
                   colors: [
@@ -105,14 +97,29 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                   begin: Alignment.topLeft,
                   end: Alignment.bottomRight,
                 ),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(24),
+                boxShadow: [
+                  BoxShadow(
+                    color: AppTheme.primary.withValues(alpha: 0.3),
+                    blurRadius: 20,
+                    offset: const Offset(0, 10),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
-                  const Icon(
-                    Icons.auto_awesome_rounded,
-                    size: 48,
-                    color: Colors.white,
+                  Container(
+                    width: 64,
+                    height: 64,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withValues(alpha: 0.2),
+                      borderRadius: BorderRadius.circular(18),
+                    ),
+                    child: const Icon(
+                      Icons.auto_awesome_rounded,
+                      size: 32,
+                      color: Colors.white,
+                    ),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -131,7 +138,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // Photo Section
             if (_selectedImage != null) ...[
@@ -153,7 +160,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                     child: GestureDetector(
                       onTap: _clearImage,
                       child: Container(
-                        padding: const EdgeInsets.all(6),
+                        padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
                           color: Colors.black54,
                           borderRadius: BorderRadius.circular(20),
@@ -161,14 +168,14 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                         child: const Icon(
                           Icons.close,
                           color: Colors.white,
-                          size: 20,
+                          size: 18,
                         ),
                       ),
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
             ] else ...[
               // Gallery Button
               _buildPhotoButton(
@@ -176,7 +183,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 label: 'Pick from Gallery',
                 onTap: _pickFromGallery,
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
 
               // Divider with "OR"
               Row(
@@ -188,13 +195,14 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                       'OR',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
                             fontWeight: FontWeight.w600,
+                            color: AppTheme.textTertiary,
                           ),
                     ),
                   ),
                   const Expanded(child: Divider()),
                 ],
               ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
             ],
 
             // Food Input
@@ -209,7 +217,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 alignLabelWithHint: true,
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
 
             // Meal Type Selection
             Text(
@@ -229,7 +237,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                 _buildMealChip('snack', 'Snack', Icons.cookie_rounded),
               ],
             ),
-            const SizedBox(height: 28),
+            const SizedBox(height: 32),
 
             // Analyze Button
             SizedBox(
@@ -257,10 +265,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               Container(
                 padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.1),
+                  color: AppTheme.error.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: AppTheme.error.withValues(alpha: 0.3),
+                    color: AppTheme.error.withValues(alpha: 0.2),
                   ),
                 ),
                 child: Row(
@@ -269,7 +277,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppTheme.error.withValues(alpha: 0.1),
+                        color: AppTheme.error.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: const Icon(
@@ -331,23 +339,31 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: AppTheme.primary.withValues(alpha: 0.05),
+          color: AppTheme.primary.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: AppTheme.primary.withValues(alpha: 0.2),
+            color: AppTheme.primary.withValues(alpha: 0.15),
             width: 1.5,
           ),
         ),
         child: Column(
           children: [
-            Icon(
-              icon,
-              color: AppTheme.primary,
-              size: 32,
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: AppTheme.primary.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(
+                icon,
+                color: AppTheme.primary,
+                size: 28,
+              ),
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               label,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(
@@ -421,45 +437,41 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               // AI Badge
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppTheme.primary,
-                          AppTheme.secondary,
-                        ],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        const Icon(
-                          Icons.auto_awesome,
-                          color: Colors.white,
-                          size: 14,
-                        ),
-                        const SizedBox(width: 6),
-                        Text(
-                          'AI Analysis',
-                          style: Theme.of(context)
-                              .textTheme
-                              .labelSmall
-                              ?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                              ),
-                        ),
-                      ],
-                    ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 14,
+                  vertical: 8,
+                ),
+                decoration: BoxDecoration(
+                  gradient: const LinearGradient(
+                    colors: [
+                      AppTheme.primary,
+                      AppTheme.secondary,
+                    ],
                   ),
-                ],
+                  borderRadius: BorderRadius.circular(24),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.auto_awesome,
+                      color: Colors.white,
+                      size: 14,
+                    ),
+                    const SizedBox(width: 8),
+                    Text(
+                      'AI Analysis',
+                      style: Theme.of(context)
+                          .textTheme
+                          .labelSmall
+                          ?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w600,
+                          ),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(height: 20),
 
@@ -472,20 +484,28 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
 
               // Calories Row
               Container(
-                padding: const EdgeInsets.all(16),
+                padding: const EdgeInsets.all(20),
                 decoration: BoxDecoration(
-                  color: AppTheme.bmiOverweight.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(14),
+                  color: AppTheme.bmiOverweight.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(16),
                 ),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(
-                      Icons.local_fire_department_rounded,
-                      color: AppTheme.bmiOverweight,
-                      size: 28,
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: AppTheme.bmiOverweight.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.local_fire_department_rounded,
+                        color: AppTheme.bmiOverweight,
+                        size: 22,
+                      ),
                     ),
-                    const SizedBox(width: 12),
+                    const SizedBox(width: 14),
                     Text(
                       analysis.calories.toStringAsFixed(0),
                       style:
@@ -510,13 +530,13 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               Container(
                 padding: const EdgeInsets.symmetric(
                   horizontal: 16,
-                  vertical: 10,
+                  vertical: 12,
                 ),
                 decoration: BoxDecoration(
-                  color: statusColor.withValues(alpha: 0.1),
+                  color: statusColor.withValues(alpha: 0.08),
                   borderRadius: BorderRadius.circular(14),
                   border: Border.all(
-                    color: statusColor.withValues(alpha: 0.3),
+                    color: statusColor.withValues(alpha: 0.2),
                     width: 1.5,
                   ),
                 ),
@@ -535,6 +555,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
                       isJunk ? 'Junk Food' : 'Healthy Food',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             color: statusColor,
+                            fontWeight: FontWeight.w600,
                           ),
                     ),
                   ],
@@ -545,7 +566,9 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               // Reason
               Text(
                 analysis.reason,
-                style: Theme.of(context).textTheme.bodyMedium,
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      height: 1.5,
+                    ),
               ),
             ],
           ),

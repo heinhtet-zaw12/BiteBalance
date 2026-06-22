@@ -17,12 +17,12 @@ class BmiIndicator extends StatelessWidget {
 
     return Column(
       children: [
-        // BMI Value
+        // BMI Value — purple theme gradient
         ShaderMask(
           shaderCallback: (bounds) => LinearGradient(
             colors: [
-              color,
-              color.withValues(alpha: 0.7),
+              AppTheme.primary,
+              AppTheme.primaryLight,
             ],
           ).createShader(bounds),
           child: Text(
@@ -57,9 +57,9 @@ class BmiIndicator extends StatelessWidget {
                 ),
           ),
         ),
-        const SizedBox(height: 16),
+        const SizedBox(height: 20),
 
-        // BMI Scale
+        // BMI Scale with gradient indicator
         _buildBmiScale(context, color),
       ],
     );
@@ -68,28 +68,69 @@ class BmiIndicator extends StatelessWidget {
   Widget _buildBmiScale(BuildContext context, Color color) {
     return Column(
       children: [
-        ClipRRect(
-          borderRadius: BorderRadius.circular(8),
-          child: LinearProgressIndicator(
-            value: (bmi.clamp(15, 40) - 15) / 25,
-            minHeight: 8,
-            backgroundColor: AppTheme.divider,
-            valueColor: AlwaysStoppedAnimation(color),
-          ),
+        Stack(
+          children: [
+            // Background gradient track
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                height: 10,
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.bmiUnderweight.withValues(alpha: 0.3),
+                      AppTheme.bmiNormal.withValues(alpha: 0.3),
+                      AppTheme.bmiOverweight.withValues(alpha: 0.3),
+                      AppTheme.bmiObese.withValues(alpha: 0.3),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            // Active progress
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: LinearProgressIndicator(
+                value: (bmi.clamp(15, 40) - 15) / 25,
+                minHeight: 10,
+                backgroundColor: Colors.transparent,
+                valueColor: AlwaysStoppedAnimation(color),
+              ),
+            ),
+          ],
         ),
-        const SizedBox(height: 8),
+        const SizedBox(height: 10),
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
-            Text(
-              '15',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
-            Text(
-              '40',
-              style: Theme.of(context).textTheme.labelSmall,
-            ),
+            _buildScaleLabel(context, 'Underweight', AppTheme.bmiUnderweight),
+            _buildScaleLabel(context, 'Normal', AppTheme.bmiNormal),
+            _buildScaleLabel(context, 'Overweight', AppTheme.bmiOverweight),
+            _buildScaleLabel(context, 'Obese', AppTheme.bmiObese),
           ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildScaleLabel(BuildContext context, String label, Color color) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Container(
+          width: 6,
+          height: 6,
+          decoration: BoxDecoration(
+            color: color,
+            shape: BoxShape.circle,
+          ),
+        ),
+        const SizedBox(width: 4),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                fontSize: 9,
+              ),
         ),
       ],
     );

@@ -25,12 +25,20 @@ class HealthyJunkChart extends StatelessWidget {
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Icon(
-                    Icons.pie_chart_outline_rounded,
-                    color: AppTheme.primary,
-                    size: 20,
+                  Container(
+                    width: 28,
+                    height: 28,
+                    decoration: BoxDecoration(
+                      color: AppTheme.primary.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: const Icon(
+                      Icons.pie_chart_outline_rounded,
+                      color: AppTheme.primary,
+                      size: 16,
+                    ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   Text(
                     'Healthy vs Junk',
                     style: Theme.of(context).textTheme.titleMedium,
@@ -78,12 +86,20 @@ class HealthyJunkChart extends StatelessWidget {
             Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.pie_chart_rounded,
-                  color: AppTheme.primary,
-                  size: 20,
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.pie_chart_rounded,
+                    color: AppTheme.primary,
+                    size: 16,
+                  ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Text(
                   'Healthy vs Junk',
                   style: Theme.of(context).textTheme.titleMedium,
@@ -103,7 +119,7 @@ class HealthyJunkChart extends StatelessWidget {
                       color: AppTheme.success,
                       radius: 55,
                       showTitle: false,
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.white,
                         width: 2,
                       ),
@@ -113,7 +129,7 @@ class HealthyJunkChart extends StatelessWidget {
                       color: AppTheme.error,
                       radius: 55,
                       showTitle: false,
-                      borderSide: BorderSide(
+                      borderSide: const BorderSide(
                         color: Colors.white,
                         width: 2,
                       ),
@@ -123,34 +139,41 @@ class HealthyJunkChart extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 24),
-            Row(
-              children: [
-                Expanded(
-                  child: _buildLegend(
-                    context,
-                    color: AppTheme.success,
-                    label: 'Healthy',
-                    percent: '$healthyPercent%',
-                    calories: '${healthyCalories.toStringAsFixed(0)} kcal',
-                    icon: Icons.check_circle_rounded,
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildLegend(
+                      context,
+                      color: AppTheme.success,
+                      label: 'Healthy',
+                      percent: '$healthyPercent%',
+                      calories: '${healthyCalories.toStringAsFixed(0)} kcal',
+                      icon: Icons.check_circle_rounded,
+                    ),
                   ),
-                ),
-                Container(
-                  width: 1,
-                  height: 56,
-                  color: AppTheme.divider,
-                ),
-                Expanded(
-                  child: _buildLegend(
-                    context,
-                    color: AppTheme.error,
-                    label: 'Junk',
-                    percent: '$junkPercent%',
-                    calories: '${junkCalories.toStringAsFixed(0)} kcal',
-                    icon: Icons.warning_rounded,
+                  Container(
+                    width: 1,
+                    height: 48,
+                    color: AppTheme.divider,
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: _buildLegend(
+                      context,
+                      color: AppTheme.error,
+                      label: 'Junk',
+                      percent: '$junkPercent%',
+                      calories: '${junkCalories.toStringAsFixed(0)} kcal',
+                      icon: Icons.warning_rounded,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -168,10 +191,18 @@ class HealthyJunkChart extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          color: color,
-          size: 24,
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(
+            icon,
+            color: color,
+            size: 20,
+          ),
         ),
         const SizedBox(height: 8),
         Text(

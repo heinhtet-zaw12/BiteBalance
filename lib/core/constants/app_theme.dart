@@ -28,28 +28,59 @@ class AppTheme {
   static const Color bmiOverweight = Color(0xFFF97316); // Orange
   static const Color bmiObese = Color(0xFFEF4444); // Red
 
+  // Shadow presets for consistent depth
+  static List<BoxShadow> get softShadow => [
+    BoxShadow(
+      color: primary.withValues(alpha: 0.08),
+      blurRadius: 12,
+      offset: const Offset(0, 4),
+    ),
+  ];
+
+  static List<BoxShadow> get mediumShadow => [
+    BoxShadow(
+      color: primary.withValues(alpha: 0.12),
+      blurRadius: 20,
+      offset: const Offset(0, 8),
+    ),
+  ];
+
   static ThemeData get lightTheme {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: primary,
+      brightness: Brightness.light,
+    ).copyWith(
+      primary: primary,
+      primaryContainer: primaryLight,
+      secondary: secondary,
+      tertiary: accent,
+      surface: surface,
+      error: error,
+      onPrimary: Colors.white,
+      onSecondary: Colors.white,
+      onSurface: textPrimary,
+      onError: Colors.white,
+      surfaceContainerHighest: surfaceVariant,
+    );
+
     return ThemeData(
       useMaterial3: true,
       brightness: Brightness.light,
-      colorScheme: ColorScheme.light(
-        primary: primary,
-        primaryContainer: primaryLight,
-        secondary: secondary,
-        tertiary: accent,
-        surface: surface,
-        error: error,
-        onPrimary: Colors.white,
-        onSecondary: Colors.white,
-        onSurface: textPrimary,
-        onError: Colors.white,
-      ),
+      colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
       textTheme: _buildTextTheme(),
+      splashFactory: InkSparkle.splashFactory,
+      pageTransitionsTheme: const PageTransitionsTheme(
+        builders: {
+          TargetPlatform.android: CupertinoPageTransitionsBuilder(),
+          TargetPlatform.iOS: CupertinoPageTransitionsBuilder(),
+        },
+      ),
       appBarTheme: AppBarTheme(
         backgroundColor: surface,
         foregroundColor: textPrimary,
         elevation: 0,
+        scrolledUnderElevation: 1,
         centerTitle: true,
         titleTextStyle: GoogleFonts.archivoBlack(
           fontSize: 18,
@@ -60,6 +91,7 @@ class AppTheme {
       cardTheme: CardThemeData(
         color: surface,
         elevation: 0,
+        shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
           side: BorderSide(color: divider, width: 1),
@@ -102,6 +134,16 @@ class AppTheme {
           fontSize: 14,
           color: textTertiary,
         ),
+        prefixIconColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) return primary;
+          if (states.contains(WidgetState.error)) return error;
+          return textTertiary;
+        }),
+        suffixIconColor: WidgetStateColor.resolveWith((states) {
+          if (states.contains(WidgetState.focused)) return primary;
+          if (states.contains(WidgetState.error)) return error;
+          return textTertiary;
+        }),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
         style: ElevatedButton.styleFrom(
@@ -119,6 +161,16 @@ class AppTheme {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
+        ).copyWith(
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return Colors.white.withValues(alpha: 0.15);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return Colors.white.withValues(alpha: 0.08);
+            }
+            return null;
+          }),
         ),
       ),
       outlinedButtonTheme: OutlinedButtonThemeData(
@@ -136,6 +188,16 @@ class AppTheme {
             fontSize: 16,
             fontWeight: FontWeight.w600,
           ),
+        ).copyWith(
+          overlayColor: WidgetStateProperty.resolveWith((states) {
+            if (states.contains(WidgetState.pressed)) {
+              return primary.withValues(alpha: 0.12);
+            }
+            if (states.contains(WidgetState.hovered)) {
+              return primary.withValues(alpha: 0.06);
+            }
+            return null;
+          }),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
@@ -160,6 +222,29 @@ class AppTheme {
             borderSide: BorderSide(color: inputBorder, width: 1.5),
           ),
         ),
+      ),
+      snackBarTheme: SnackBarThemeData(
+        behavior: SnackBarBehavior.floating,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        contentTextStyle: GoogleFonts.archivoBlack(
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+        ),
+      ),
+      floatingActionButtonTheme: FloatingActionButtonThemeData(
+        backgroundColor: primary,
+        foregroundColor: Colors.white,
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
+      ),
+      dividerTheme: DividerThemeData(
+        color: divider,
+        thickness: 1,
+        space: 1,
       ),
     );
   }

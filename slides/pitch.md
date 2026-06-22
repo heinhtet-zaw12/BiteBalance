@@ -9,12 +9,13 @@ auto-advance: 20
 <!-- slide 1 -->
 # Who's my person?
 
-People who want to eat healthier but has no easy way to track daily food intake or know whether what they eat is good or bad for their body.
+My relative who wants to eat healthier but has no easy way to track daily food intake or know whether what they eat is good or bad for their body.
 
 ---
 
 <!-- slide 2 -->
 # Their problem
+
 - No easy way to track daily calories
 - Can't tell healthy food from junk food
 - No personalized targets based on their BMI

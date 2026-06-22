@@ -19,13 +19,21 @@ class BmiCard extends StatelessWidget {
     if (profile.weight == null || profile.height == null) {
       return Card(
         child: Padding(
-          padding: const EdgeInsets.all(24),
+          padding: const EdgeInsets.all(28),
           child: Column(
             children: [
-              const Icon(
-                Icons.info_outline_rounded,
-                size: 48,
-                color: AppTheme.textTertiary,
+              Container(
+                width: 64,
+                height: 64,
+                decoration: BoxDecoration(
+                  color: AppTheme.textTertiary.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(18),
+                ),
+                child: const Icon(
+                  Icons.info_outline_rounded,
+                  size: 32,
+                  color: AppTheme.textTertiary,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -49,42 +57,58 @@ class BmiCard extends StatelessWidget {
 
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(28),
         child: Column(
           children: [
             Text(
               'Your BMI',
-              style: Theme.of(context).textTheme.titleLarge,
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
             ),
             const SizedBox(height: 20),
             BmiIndicator(bmi: bmi, category: category),
-            const SizedBox(height: 24),
+            const SizedBox(height: 28),
 
             // Stats Row
-            Row(
-              children: [
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    icon: Icons.monitor_weight_outlined,
-                    label: 'Weight',
-                    value: '${profile.weight!.toStringAsFixed(1)} kg',
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 16),
+              decoration: BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    AppTheme.primary.withValues(alpha: 0.04),
+                    AppTheme.primaryLight.withValues(alpha: 0.06),
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Row(
+                children: [
+                  Expanded(
+                    child: _buildStatItem(
+                      context,
+                      icon: Icons.monitor_weight_outlined,
+                      label: 'Weight',
+                      value: '${profile.weight!.toStringAsFixed(1)} kg',
+                    ),
                   ),
-                ),
-                Container(
-                  width: 1,
-                  height: 48,
-                  color: AppTheme.divider,
-                ),
-                Expanded(
-                  child: _buildStatItem(
-                    context,
-                    icon: Icons.height,
-                    label: 'Height',
-                    value: '${profile.height!.toStringAsFixed(1)} cm',
+                  Container(
+                    width: 1,
+                    height: 40,
+                    color: AppTheme.divider,
                   ),
-                ),
-              ],
+                  Expanded(
+                    child: _buildStatItem(
+                      context,
+                      icon: Icons.height,
+                      label: 'Height',
+                      value: '${profile.height!.toStringAsFixed(1)} cm',
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -100,10 +124,18 @@ class BmiCard extends StatelessWidget {
   }) {
     return Column(
       children: [
-        Icon(
-          icon,
-          size: 24,
-          color: AppTheme.primary,
+        Container(
+          width: 40,
+          height: 40,
+          decoration: BoxDecoration(
+            color: AppTheme.primary.withValues(alpha: 0.1),
+            borderRadius: BorderRadius.circular(12),
+          ),
+          child: Icon(
+            icon,
+            size: 20,
+            color: AppTheme.primary,
+          ),
         ),
         const SizedBox(height: 8),
         Text(

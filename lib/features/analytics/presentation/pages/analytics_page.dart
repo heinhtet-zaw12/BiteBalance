@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/utils/responsive.dart';
 import 'package:bite_balance/features/analytics/domain/entities/analytics_stats.dart';
 import 'package:bite_balance/features/analytics/presentation/providers/analytics_provider.dart';
 import 'package:bite_balance/features/analytics/presentation/widgets/calorie_progress_card.dart';
@@ -80,25 +81,84 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
 
     return Scaffold(
       backgroundColor: AppTheme.background,
-      appBar: AppBar(
-        title: const Text('Analytics'),
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: const [
-            Tab(text: 'Daily'),
-            Tab(text: 'Weekly'),
-            Tab(text: 'Monthly'),
-          ],
+      appBar: Responsive.isDesktop(context)
+          ? null
+          : AppBar(
+              title: const Text('Analytics'),
+              bottom: TabBar(
+                controller: _tabController,
+                indicatorColor: AppTheme.primary,
+                labelColor: AppTheme.primary,
+                unselectedLabelColor: AppTheme.textSecondary,
+                indicatorSize: TabBarIndicatorSize.label,
+                tabs: const [
+                  Tab(text: 'Daily'),
+                  Tab(text: 'Weekly'),
+                  Tab(text: 'Monthly'),
+                ],
+              ),
+            ),
+      body: Responsive.isDesktop(context)
+          ? _buildDesktopLayout(context, calorieTarget)
+          : TabBarView(
+              controller: _tabController,
+              children: [
+                _DailyTab(calorieTarget: calorieTarget),
+                _WeeklyTab(calorieTarget: calorieTarget),
+                _MonthlyTab(calorieTarget: calorieTarget),
+              ],
+            ),
+    );
+  }
+
+  /// Desktop: tabs as horizontal row above content, not AppBar
+  Widget _buildDesktopLayout(BuildContext context, double calorieTarget) {
+    return Column(
+      children: [
+        // Title + Tab row
+        Padding(
+          padding: const EdgeInsets.fromLTRB(32, 16, 32, 0),
+          child: Row(
+            children: [
+              Text(
+                'Analytics',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(width: 32),
+              Expanded(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  child: TabBar(
+                    controller: _tabController,
+                    indicatorColor: AppTheme.primary,
+                    labelColor: AppTheme.primary,
+                    unselectedLabelColor: AppTheme.textSecondary,
+                    indicatorSize: TabBarIndicatorSize.label,
+                    isScrollable: true,
+                    tabs: const [
+                      Tab(text: 'Daily'),
+                      Tab(text: 'Weekly'),
+                      Tab(text: 'Monthly'),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
-      ),
-      body: TabBarView(
-        controller: _tabController,
-        children: [
-          _DailyTab(calorieTarget: calorieTarget),
-          _WeeklyTab(calorieTarget: calorieTarget),
-          _MonthlyTab(calorieTarget: calorieTarget),
-        ],
-      ),
+        const Divider(height: 1),
+        // Tab content
+        Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              _DailyTab(calorieTarget: calorieTarget),
+              _WeeklyTab(calorieTarget: calorieTarget),
+              _MonthlyTab(calorieTarget: calorieTarget),
+            ],
+          ),
+        ),
+      ],
     );
   }
 }
@@ -161,26 +221,20 @@ class _WeeklyTab extends ConsumerWidget {
           return const Center(child: Text('No data available'));
         }
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CalorieProgressCard(
-                consumed: stats.totalCalories,
-                target: calorieTarget * 7,
-                title: 'Weekly Calories',
-              ),
-              const SizedBox(height: 16),
-              HealthyJunkPieChart(
-                healthyCalories: stats.healthyCalories,
-                junkCalories: stats.junkCalories,
-              ),
-              const SizedBox(height: 16),
-              JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
-              const SizedBox(height: 16),
-              _WeeklyBreakdownCard(dailyBreakdown: stats.dailyBreakdown),
-            ],
-          ),
+        return _ResponsiveChartLayout(
+          children: [
+            CalorieProgressCard(
+              consumed: stats.totalCalories,
+              target: calorieTarget * 7,
+              title: 'Weekly Calories',
+            ),
+            HealthyJunkPieChart(
+              healthyCalories: stats.healthyCalories,
+              junkCalories: stats.junkCalories,
+            ),
+            JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
+            _WeeklyBreakdownCard(dailyBreakdown: stats.dailyBreakdown),
+          ],
         );
       },
     );
@@ -215,43 +269,91 @@ class _MonthlyTab extends ConsumerWidget {
         final daysInMonth =
             DateTime(stats.year, stats.month + 1, 0).day;
 
-        return SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            children: [
-              CalorieProgressCard(
-                consumed: stats.totalCalories,
-                target: calorieTarget * daysInMonth,
-                title: 'Monthly Calories',
-              ),
-              const SizedBox(height: 16),
-              HealthyJunkPieChart(
-                healthyCalories: stats.healthyCalories,
-                junkCalories: stats.junkCalories,
-              ),
-              const SizedBox(height: 16),
-              JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
-              const SizedBox(height: 16),
-              _StatsInfoCard(
-                title: 'Monthly Summary',
-                items: [
-                  _StatsInfoItem(
-                    label: 'Days Tracked',
-                    value: '${stats.totalDaysTracked}',
-                    icon: Icons.calendar_today_rounded,
-                  ),
-                  _StatsInfoItem(
-                    label: 'Avg Daily Calories',
-                    value:
-                        '${stats.averageDailyCalories.toStringAsFixed(0)} kcal',
-                    icon: Icons.trending_up_rounded,
-                  ),
-                ],
-              ),
-            ],
-          ),
+        return _ResponsiveChartLayout(
+          children: [
+            CalorieProgressCard(
+              consumed: stats.totalCalories,
+              target: calorieTarget * daysInMonth,
+              title: 'Monthly Calories',
+            ),
+            HealthyJunkPieChart(
+              healthyCalories: stats.healthyCalories,
+              junkCalories: stats.junkCalories,
+            ),
+            JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
+            _StatsInfoCard(
+              title: 'Monthly Summary',
+              items: [
+                _StatsInfoItem(
+                  label: 'Days Tracked',
+                  value: '${stats.totalDaysTracked}',
+                  icon: Icons.calendar_today_rounded,
+                ),
+                _StatsInfoItem(
+                  label: 'Avg Daily Calories',
+                  value:
+                      '${stats.averageDailyCalories.toStringAsFixed(0)} kcal',
+                  icon: Icons.trending_up_rounded,
+                ),
+              ],
+            ),
+          ],
         );
       },
+    );
+  }
+}
+
+/// Responsive chart layout:
+/// - Mobile: single column, stacked
+/// - Tablet/Desktop: 2-column grid for charts
+class _ResponsiveChartLayout extends StatelessWidget {
+  final List<Widget> children;
+
+  const _ResponsiveChartLayout({required this.children});
+
+  @override
+  Widget build(BuildContext context) {
+    final padding = Responsive.pagePadding(context);
+
+    if (!Responsive.isWide(context)) {
+      // Mobile: single column
+      return SingleChildScrollView(
+        padding: padding,
+        child: Column(
+          children: children
+              .map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: c,
+                  ))
+              .toList(),
+        ),
+      );
+    }
+
+    // Tablet/Desktop: 2-column grid
+    return SingleChildScrollView(
+      padding: padding,
+      child: Column(
+        children: [
+          // First row: progress + pie chart side by side
+          if (children.length >= 2)
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Expanded(child: children[0]),
+                const SizedBox(width: 16),
+                Expanded(child: children[1]),
+              ],
+            ),
+          if (children.length >= 2) const SizedBox(height: 16),
+          // Remaining cards
+          ...children.skip(2).map((c) => Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: c,
+              )),
+        ],
+      ),
     );
   }
 }
@@ -271,42 +373,35 @@ class _StatsContent extends StatelessWidget {
   Widget build(BuildContext context) {
     return RefreshIndicator(
       onRefresh: () async => onRefresh(),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            CalorieProgressCard(
-              consumed: stats.totalCalories,
-              target: calorieTarget,
-              title: 'Today\'s Calories',
-            ),
-            const SizedBox(height: 16),
-            HealthyJunkPieChart(
-              healthyCalories: stats.healthyCalories,
-              junkCalories: stats.junkCalories,
-            ),
-            const SizedBox(height: 16),
-            JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
-            const SizedBox(height: 16),
-            _StatsInfoCard(
-              title: 'Today\'s Summary',
-              items: [
-                _StatsInfoItem(
-                  label: 'Total Items',
-                  value: '${stats.totalItems}',
-                  icon: Icons.restaurant_rounded,
-                ),
-                _StatsInfoItem(
-                  label: 'Healthy',
-                  value:
-                      '${stats.healthyRatio * 100}%',
-                  icon: Icons.favorite_rounded,
-                ),
-              ],
-            ),
-          ],
-        ),
+      child: _ResponsiveChartLayout(
+        children: [
+          CalorieProgressCard(
+            consumed: stats.totalCalories,
+            target: calorieTarget,
+            title: 'Today\'s Calories',
+          ),
+          HealthyJunkPieChart(
+            healthyCalories: stats.healthyCalories,
+            junkCalories: stats.junkCalories,
+          ),
+          JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
+          _StatsInfoCard(
+            title: 'Today\'s Summary',
+            items: [
+              _StatsInfoItem(
+                label: 'Total Items',
+                value: '${stats.totalItems}',
+                icon: Icons.restaurant_rounded,
+              ),
+              _StatsInfoItem(
+                label: 'Healthy',
+                value:
+                    '${(stats.healthyRatio * 100).toStringAsFixed(0)}%',
+                icon: Icons.favorite_rounded,
+              ),
+            ],
+          ),
+        ],
       ),
     );
   }
@@ -321,17 +416,35 @@ class _WeeklyBreakdownCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              'Weekly Breakdown',
-              style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
+            Row(
+              children: [
+                Container(
+                  width: 28,
+                  height: 28,
+                  decoration: BoxDecoration(
+                    color: AppTheme.primary.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(8),
                   ),
+                  child: const Icon(
+                    Icons.calendar_view_week_rounded,
+                    color: AppTheme.primary,
+                    size: 16,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Text(
+                  'Weekly Breakdown',
+                  style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
             ),
-            const SizedBox(height: 16),
+            const SizedBox(height: 20),
             ...dailyBreakdown.map((day) {
               final dayName = _getDayName(day.date.weekday);
               return Padding(
@@ -348,17 +461,33 @@ class _WeeklyBreakdownCard extends StatelessWidget {
                     const SizedBox(width: 12),
                     Expanded(
                       child: ClipRRect(
-                        borderRadius: BorderRadius.circular(4),
-                        child: LinearProgressIndicator(
-                          value: day.totalCalories > 0
-                              ? (day.totalCalories / 2000).clamp(0.0, 1.0)
-                              : 0.0,
-                          minHeight: 8,
-                          backgroundColor: AppTheme.surfaceVariant,
-                          valueColor: AlwaysStoppedAnimation<Color>(
-                            day.junkCalories > day.healthyCalories
-                                ? AppTheme.error
-                                : AppTheme.success,
+                        borderRadius: BorderRadius.circular(6),
+                        child: SizedBox(
+                          height: 10,
+                          child: Stack(
+                            children: [
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: AppTheme.surfaceVariant,
+                                  borderRadius: BorderRadius.circular(6),
+                                ),
+                              ),
+                              FractionallySizedBox(
+                                widthFactor: day.totalCalories > 0
+                                    ? (day.totalCalories / 2000)
+                                        .clamp(0.0, 1.0)
+                                    : 0.0,
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    color: day.junkCalories >
+                                            day.healthyCalories
+                                        ? AppTheme.error
+                                        : AppTheme.success,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
                       ),
@@ -414,7 +543,7 @@ class _StatsInfoCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: Padding(
-        padding: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
@@ -425,39 +554,52 @@ class _StatsInfoCard extends StatelessWidget {
                   ),
             ),
             const SizedBox(height: 16),
-            ...items.map((item) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primary.withValues(alpha: 0.1),
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                        child: Icon(
-                          item.icon,
-                          color: AppTheme.primary,
-                          size: 20,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Text(
-                          item.label,
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ),
-                      Text(
-                        item.value,
-                        style:
-                            Theme.of(context).textTheme.titleMedium?.copyWith(
-                                  fontWeight: FontWeight.w600,
+            Container(
+              decoration: BoxDecoration(
+                color: AppTheme.surfaceVariant,
+                borderRadius: BorderRadius.circular(16),
+              ),
+              child: Column(
+                children: items
+                    .map((item) => Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Row(
+                            children: [
+                              Container(
+                                width: 40,
+                                height: 40,
+                                decoration: BoxDecoration(
+                                  color: AppTheme.primary.withValues(alpha: 0.1),
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
-                      ),
-                    ],
-                  ),
-                )),
+                                child: Icon(
+                                  item.icon,
+                                  color: AppTheme.primary,
+                                  size: 20,
+                                ),
+                              ),
+                              const SizedBox(width: 14),
+                              Expanded(
+                                child: Text(
+                                  item.label,
+                                  style: Theme.of(context).textTheme.bodyMedium,
+                                ),
+                              ),
+                              Text(
+                                item.value,
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .titleMedium
+                                    ?.copyWith(
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ))
+                    .toList(),
+              ),
+            ),
           ],
         ),
       ),

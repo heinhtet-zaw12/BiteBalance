@@ -13,7 +13,6 @@ class FoodLogTile extends StatelessWidget {
     final statusColor = isJunk ? AppTheme.error : AppTheme.success;
 
     return Card(
-      margin: const EdgeInsets.only(bottom: 12),
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Row(
@@ -48,15 +47,30 @@ class FoodLogTile extends StatelessWidget {
                   const SizedBox(height: 4),
                   Row(
                     children: [
-                      Icon(
-                        _getMealIcon(foodLog.mealType),
-                        size: 14,
-                        color: AppTheme.textTertiary,
-                      ),
-                      const SizedBox(width: 4),
-                      Text(
-                        _getMealTypeLabel(foodLog.mealType),
-                        style: Theme.of(context).textTheme.bodySmall,
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.surfaceVariant,
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getMealIcon(foodLog.mealType),
+                              size: 12,
+                              color: AppTheme.textTertiary,
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              _getMealTypeLabel(foodLog.mealType),
+                              style: Theme.of(context).textTheme.labelSmall,
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -69,15 +83,27 @@ class FoodLogTile extends StatelessWidget {
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  foodLog.calories.toStringAsFixed(0),
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    Text(
+                      foodLog.calories.toStringAsFixed(0),
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w800,
+                          ),
+                    ),
+                    const SizedBox(width: 2),
+                    Padding(
+                      padding: const EdgeInsets.only(bottom: 2),
+                      child: Text(
+                        'kcal',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: AppTheme.textTertiary,
+                            ),
                       ),
-                ),
-                Text(
-                  'kcal',
-                  style: Theme.of(context).textTheme.labelSmall,
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 6),
                 Container(
@@ -89,12 +115,26 @@ class FoodLogTile extends StatelessWidget {
                     color: statusColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(8),
                   ),
-                  child: Text(
-                    isJunk ? 'Junk' : 'Healthy',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 6,
+                        height: 6,
+                        decoration: BoxDecoration(
                           color: statusColor,
-                          fontWeight: FontWeight.w700,
+                          shape: BoxShape.circle,
                         ),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isJunk ? 'Junk' : 'Healthy',
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                              color: statusColor,
+                              fontWeight: FontWeight.w700,
+                            ),
+                      ),
+                    ],
                   ),
                 ),
               ],

@@ -33,13 +33,14 @@ class RemainingCaloriesCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            // Header row
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(10),
+                  padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
                     color: progressColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    borderRadius: BorderRadius.circular(14),
                   ),
                   child: Icon(
                     isOverTarget
@@ -77,39 +78,106 @@ class RemainingCaloriesCard extends StatelessWidget {
                     ],
                   ),
                 ),
+                // Percentage badge
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 12,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: progressColor.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: Text(
+                    '${(progress * 100).toStringAsFixed(0)}%',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: progressColor,
+                          fontWeight: FontWeight.w700,
+                        ),
+                  ),
+                ),
               ],
             ),
             const SizedBox(height: 20),
+
+            // Progress bar with gradient
             ClipRRect(
               borderRadius: BorderRadius.circular(8),
-              child: LinearProgressIndicator(
-                value: progress,
-                minHeight: 12,
-                backgroundColor: AppTheme.surfaceVariant,
-                valueColor: AlwaysStoppedAnimation<Color>(progressColor),
+              child: SizedBox(
+                height: 12,
+                child: Stack(
+                  children: [
+                    // Background
+                    Container(
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceVariant,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    // Progress with gradient
+                    FractionallySizedBox(
+                      widthFactor: progress,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            colors: [
+                              progressColor,
+                              progressColor.withValues(alpha: 0.8),
+                            ],
+                          ),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 14),
+
+            // Labels row
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  '${caloriesConsumed.toStringAsFixed(0)} kcal eaten',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
+                _buildLabel(
+                  context,
+                  icon: Icons.restaurant_rounded,
+                  label: '${caloriesConsumed.toStringAsFixed(0)} kcal eaten',
                 ),
-                Text(
-                  '${calorieTarget.toStringAsFixed(0)} kcal target',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppTheme.textSecondary,
-                      ),
+                _buildLabel(
+                  context,
+                  icon: Icons.flag_rounded,
+                  label: '${calorieTarget.toStringAsFixed(0)} kcal target',
                 ),
               ],
             ),
           ],
         ),
       ),
+    );
+  }
+
+  Widget _buildLabel(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+  }) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Icon(
+          icon,
+          size: 14,
+          color: AppTheme.textTertiary,
+        ),
+        const SizedBox(width: 6),
+        Text(
+          label,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: AppTheme.textSecondary,
+              ),
+        ),
+      ],
     );
   }
 }
