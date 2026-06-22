@@ -65,11 +65,20 @@ lib/
 
 ## 📸 Screenshots
 
-| Home | Dashboard | Log Food                                     |
-|------|-----------|----------------------------------------------|
-| ![Home](assets/screenshots/home.png) | ![Dashboard](assets/screenshots/dashboard.png) | ![Log Food](assets/screenshots/food_log.png) |
+### Auth & Profile
+| Login | Sign Up | Profile Setup | Home |
+|-------|---------|---------------|------|
+| ![Login](assets/screenshots/login.png) | ![Sign Up](assets/screenshots/sign_up.png) | ![Profile Setup](assets/screenshots/profile_setUp.png) | ![Home](assets/screenshots/home.png) |
 
----
+### Food Logging
+| Log Food | Log Food 2 | Log Food 3 |
+|----------|------------|------------|
+| ![Log Food](assets/screenshots/food_log.png) | ![Log Food 2](assets/screenshots/food_log2.png) | ![Log Food 3](assets/screenshots/food_log3.png) |
+
+### Dashboard & Analytics
+| Dashboard | Dashboard 2 | Daily | Weekly | Monthly |
+|-----------|-------------|-------|--------|---------|
+| ![Dashboard](assets/screenshots/dashboard.png) | ![Dashboard 2](assets/screenshots/dashboard2.png) | ![Daily](assets/screenshots/daily_analytics.png) | ![Weekly](assets/screenshots/weekly_analytics.png) | ![Monthly](assets/screenshots/monthly_analytics.png) |
 
 ## 🚀 Getting Started
 
@@ -97,7 +106,6 @@ flutter pub get
 cp .env.example .env
 ```
 
-`.env` file ထဲ values ဖြည့်ပါ —
 ```
 SUPABASE_URL=your-supabase-url
 SUPABASE_ANON_KEY=your-anon-key
@@ -106,7 +114,6 @@ GEMINI_API_KEY=your-gemini-key
 
 **4. Setup Supabase**
 
-Supabase dashboard မှာ ဒီ SQL run ပါ —
 ```sql
 create table profiles (
   id uuid references auth.users primary key,
