@@ -10,13 +10,13 @@ class DailySummary {
   });
 
   double get totalCalories =>
-      foodLogs.fold(0, (sum, log) => sum + log.calories);
+      foodLogs.fold(0.0, (sum, log) => sum + log.calories);
 
   double get healthyCalories =>
-      foodLogs.where((log) => !log.isJunk).fold(0, (sum, log) => sum + log.calories);
+      foodLogs.where((log) => !log.isJunk).fold(0.0, (sum, log) => sum + log.calories);
 
   double get junkCalories =>
-      foodLogs.where((log) => log.isJunk).fold(0, (sum, log) => sum + log.calories);
+      foodLogs.where((log) => log.isJunk).fold(0.0, (sum, log) => sum + log.calories);
 
   int get healthyCount => foodLogs.where((log) => !log.isJunk).length;
 

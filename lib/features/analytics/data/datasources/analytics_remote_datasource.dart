@@ -67,11 +67,11 @@ extension FoodLogStatsExtension on List<FoodLogModel> {
   }
 
   double get totalCalories =>
-      fold(0, (sum, log) => sum + log.calories);
+      fold(0.0, (sum, log) => sum + log.calories);
 
   double get healthyCalories =>
-      fold(0, (sum, log) => log.isJunk ? sum : sum + log.calories);
+      fold(0.0, (sum, log) => log.isJunk ? sum : sum + log.calories);
 
   double get junkCalories =>
-      fold(0, (sum, log) => log.isJunk ? sum + log.calories : sum);
+      fold(0.0, (sum, log) => log.isJunk ? sum + log.calories : sum);
 }

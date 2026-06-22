@@ -25,6 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp.router(
+      debugShowCheckedModeBanner: false,
       title: 'Bite Balance',
       theme: AppTheme.lightTheme,
       routerConfig: appRouter,

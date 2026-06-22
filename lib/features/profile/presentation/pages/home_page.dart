@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
 import 'package:bite_balance/core/utils/responsive.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:bite_balance/features/food_log/domain/entities/food_log.dart';
 import 'package:bite_balance/features/food_log/presentation/providers/food_log_provider.dart';
 import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
 import 'package:bite_balance/features/profile/presentation/widgets/bmi_card.dart';
@@ -426,7 +427,7 @@ class _HomePageState extends ConsumerState<HomePage>
     required dynamic profile,
     required dynamic calculateBmi,
     required AsyncValue calorieRecommendationState,
-    required AsyncValue dailyLogsState,
+    required AsyncValue<List<FoodLog>> dailyLogsState,
   }) {
     return Column(
       children: [
@@ -456,7 +457,7 @@ class _HomePageState extends ConsumerState<HomePage>
   Widget _buildCalorieColumn(
     BuildContext context, {
     required AsyncValue calorieRecommendationState,
-    required AsyncValue dailyLogsState,
+    required AsyncValue<List<FoodLog>> dailyLogsState,
   }) {
     return calorieRecommendationState.when(
       loading: () => Card(
@@ -494,9 +495,9 @@ class _HomePageState extends ConsumerState<HomePage>
         }
 
         final caloriesConsumed = dailyLogsState.maybeWhen(
-          data: (logs) => logs.fold<double>(
-            0,
-            (sum, log) => sum + log.calories,
+          data: (List<FoodLog> logs) => logs.fold<double>(
+            0.0,
+            (double sum, FoodLog log) => sum + log.calories.toDouble(),
           ),
           orElse: () => 0.0,
         );
@@ -523,7 +524,7 @@ class _HomePageState extends ConsumerState<HomePage>
     BuildContext context, {
     required int index,
     required AsyncValue calorieRecommendationState,
-    required AsyncValue dailyLogsState,
+    required AsyncValue<List<FoodLog>> dailyLogsState,
   }) {
     return [
       calorieRecommendationState.when(
@@ -565,9 +566,9 @@ class _HomePageState extends ConsumerState<HomePage>
           }
 
           final caloriesConsumed = dailyLogsState.maybeWhen(
-            data: (logs) => logs.fold<double>(
-              0,
-              (sum, log) => sum + log.calories,
+            data: (List<FoodLog> logs) => logs.fold<double>(
+              0.0,
+              (double sum, FoodLog log) => sum + log.calories.toDouble(),
             ),
             orElse: () => 0.0,
           );
