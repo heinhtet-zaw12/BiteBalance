@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
 
 abstract class GeminiVisionDataSource {
@@ -18,10 +19,11 @@ class GeminiVisionDataSourceImpl implements GeminiVisionDataSource {
 
   @override
   Future<FoodAnalysisResult> analyzeFoodImage(File imageFile) async {
-    final bytes = await imageFile.readAsBytes();
+    try {
+      final bytes = await imageFile.readAsBytes();
 
-    final prompt = TextPart(
-      '''Analyze this food image and return ONLY a JSON object (no markdown, no code blocks):
+      final prompt = TextPart(
+        '''Analyze this food image and return ONLY a JSON object (no markdown, no code blocks):
 
 Return this exact JSON format:
 {
@@ -36,26 +38,29 @@ Rules:
 - is_junk should be true for fast food, processed food, sugary snacks, fried food
 - is_junk should be false for fruits, vegetables, lean protein, whole grains
 - Keep food_name concise''',
-    );
+      );
 
-    final imagePart = DataPart(
-      'image/jpeg',
-      bytes,
-    );
+      final imagePart = DataPart(
+        'image/jpeg',
+        bytes,
+      );
 
-    final response = await _model.generateContent([
-      Content.multi([prompt, imagePart]),
-    ]);
+      final response = await _model.generateContent([
+        Content.multi([prompt, imagePart]),
+      ]);
 
-    final text = response.text?.trim() ?? '{}';
+      final text = response.text?.trim() ?? '{}';
 
-    // Clean markdown code blocks if present
-    final jsonString = text
-        .replaceAll('```json', '')
-        .replaceAll('```', '')
-        .trim();
+      final jsonString = text
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
 
-    final json = jsonDecode(jsonString) as Map<String, dynamic>;
-    return FoodAnalysisResult.fromJson(json);
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return FoodAnalysisResult.fromJson(json);
+    } catch (e, stackTrace) {
+      AppLogger.error('Gemini API error: analyzeFoodImage', e, stackTrace);
+      rethrow;
+    }
   }
 }

@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 
 class FoodAnalysisResult {
   final String foodName;
@@ -39,7 +40,8 @@ class GeminiDataSourceImpl implements GeminiDataSource {
 
   @override
   Future<FoodAnalysisResult> analyzeFood(String foodDescription) async {
-    final prompt = '''
+    try {
+      final prompt = '''
 Analyze this food and return ONLY a JSON object (no markdown, no code blocks):
 
 Food: "$foodDescription"
@@ -59,16 +61,19 @@ Rules:
 - Keep food_name concise
 ''';
 
-    final response = await _model.generateContent([Content.text(prompt)]);
-    final text = response.text?.trim() ?? '{}';
+      final response = await _model.generateContent([Content.text(prompt)]);
+      final text = response.text?.trim() ?? '{}';
 
-    // Clean markdown code blocks if present
-    final jsonString = text
-        .replaceAll('```json', '')
-        .replaceAll('```', '')
-        .trim();
+      final jsonString = text
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
 
-    final json = jsonDecode(jsonString) as Map<String, dynamic>;
-    return FoodAnalysisResult.fromJson(json);
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return FoodAnalysisResult.fromJson(json);
+    } catch (e, stackTrace) {
+      AppLogger.error('Gemini API error: analyzeFood', e, stackTrace);
+      rethrow;
+    }
   }
 }

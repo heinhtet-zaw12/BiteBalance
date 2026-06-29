@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 
 class CalorieRecommendationResult {
   final double dailyCalorieTarget;
@@ -44,7 +45,8 @@ class GeminiCalorieDataSourceImpl implements GeminiCalorieDataSource {
     required double heightCm,
     required String goal,
   }) async {
-    final prompt = '''
+    try {
+      final prompt = '''
 Calculate a daily calorie recommendation for this person and return ONLY a JSON object (no markdown, no code blocks):
 
 Weight: ${weightKg}kg
@@ -68,16 +70,19 @@ Rules:
 - Keep reasoning concise (1-2 sentences)
 ''';
 
-    final response = await _model.generateContent([Content.text(prompt)]);
-    final text = response.text?.trim() ?? '{}';
+      final response = await _model.generateContent([Content.text(prompt)]);
+      final text = response.text?.trim() ?? '{}';
 
-    // Clean markdown code blocks if present
-    final jsonString = text
-        .replaceAll('```json', '')
-        .replaceAll('```', '')
-        .trim();
+      final jsonString = text
+          .replaceAll('```json', '')
+          .replaceAll('```', '')
+          .trim();
 
-    final json = jsonDecode(jsonString) as Map<String, dynamic>;
-    return CalorieRecommendationResult.fromJson(json);
+      final json = jsonDecode(jsonString) as Map<String, dynamic>;
+      return CalorieRecommendationResult.fromJson(json);
+    } catch (e, stackTrace) {
+      AppLogger.error('Gemini API error: getCalorieRecommendation', e, stackTrace);
+      rethrow;
+    }
   }
 }
