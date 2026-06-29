@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:bite_balance/core/errors/failures.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/core/usecases/usecase.dart';
 import 'package:bite_balance/features/profile/domain/entities/calorie_recommendation.dart';
 import 'package:bite_balance/features/profile/data/datasources/gemini_calorie_datasource.dart';
@@ -26,8 +27,9 @@ class GetCalorieRecommendation
         healthyRatio: result.healthyRatio,
         reasoning: result.reasoning,
       ));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to getCalorieRecommendation', e, stackTrace);
+      return Left(ServerFailure('Unable to get calorie recommendation. Please try again.'));
     }
   }
 }

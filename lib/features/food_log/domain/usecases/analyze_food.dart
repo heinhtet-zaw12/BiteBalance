@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:bite_balance/core/errors/failures.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/core/usecases/usecase.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
 
@@ -13,8 +14,9 @@ class AnalyzeFood implements UseCase<FoodAnalysisResult, AnalyzeFoodParams> {
     try {
       final result = await geminiDataSource.analyzeFood(params.foodDescription);
       return Right(result);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to analyzeFood', e, stackTrace);
+      return Left(ServerFailure('Unable to analyze food. Please try again.'));
     }
   }
 }

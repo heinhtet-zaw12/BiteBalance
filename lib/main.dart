@@ -5,16 +5,23 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bite_balance/core/constants/app_theme.dart';
 import 'package:bite_balance/core/router/app_router.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   await dotenv.load();
 
-  await Supabase.initialize(
-    url: dotenv.get('SUPABASE_URL'),
-    publishableKey: dotenv.get('SUPABASE_ANON_KEY'),
-  );
+  try {
+    await Supabase.initialize(
+      url: dotenv.get('SUPABASE_URL'),
+      publishableKey: dotenv.get('SUPABASE_ANON_KEY'),
+    );
+    AppLogger.info('Supabase initialized successfully');
+  } catch (e, stackTrace) {
+    AppLogger.error('Failed to initialize Supabase', e, stackTrace);
+    rethrow;
+  }
 
   runApp(const ProviderScope(child: MyApp()));
 }
