@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:fpdart/fpdart.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bite_balance/core/errors/failures.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/profile/data/datasources/profile_remote_datasource.dart';
 import 'package:bite_balance/features/profile/data/models/profile_model.dart';
 import 'package:bite_balance/features/profile/domain/entities/profile.dart';
@@ -15,8 +18,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
     try {
       final profile = await remoteDataSource.getProfile(userId);
       return Right(profile);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } on PostgrestException catch (e) {
+      AppLogger.error('Failed to getProfile', e);
+      return Left(ServerFailure(e.message));
+    } on SocketException catch (e, stackTrace) {
+      AppLogger.error('Failed to getProfile: no internet', e, stackTrace);
+      return const Left(
+        NetworkFailure('Please check your internet connection and try again.'),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to getProfile', e, stackTrace);
+      return Left(ServerFailure('Unable to load profile. Please try again.'));
     }
   }
 
@@ -26,8 +38,17 @@ class ProfileRepositoryImpl implements ProfileRepository {
       final profileModel = ProfileModel.fromEntity(profile);
       final savedProfile = await remoteDataSource.saveProfile(profileModel);
       return Right(savedProfile);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } on PostgrestException catch (e) {
+      AppLogger.error('Failed to saveProfile', e);
+      return Left(ServerFailure(e.message));
+    } on SocketException catch (e, stackTrace) {
+      AppLogger.error('Failed to saveProfile: no internet', e, stackTrace);
+      return const Left(
+        NetworkFailure('Please check your internet connection and try again.'),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to saveProfile', e, stackTrace);
+      return Left(ServerFailure('Unable to save profile. Please try again.'));
     }
   }
 }

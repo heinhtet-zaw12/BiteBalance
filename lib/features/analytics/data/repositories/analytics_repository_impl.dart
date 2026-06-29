@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:fpdart/fpdart.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bite_balance/core/errors/failures.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/analytics/data/datasources/analytics_remote_datasource.dart';
 import 'package:bite_balance/features/analytics/domain/entities/analytics_stats.dart';
 import 'package:bite_balance/features/analytics/domain/repositories/analytics_repository.dart';
@@ -20,7 +23,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     try {
       final userId = authRepository.currentUser?.id;
       if (userId == null) {
-        return Left(ServerFailure('User not authenticated'));
+        return const Left(AuthFailure('Please sign in again to continue.'));
       }
 
       final startOfDay = DateTime(date.year, date.month, date.day);
@@ -40,8 +43,17 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         totalItems: logs.length,
         topJunkFoods: logs.getTopJunkFoods(),
       ));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } on PostgrestException catch (e) {
+      AppLogger.error('Failed to getDailyStats', e);
+      return Left(ServerFailure(e.message));
+    } on SocketException catch (e, stackTrace) {
+      AppLogger.error('Failed to getDailyStats: no internet', e, stackTrace);
+      return const Left(
+        NetworkFailure('Please check your internet connection and try again.'),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to getDailyStats', e, stackTrace);
+      return Left(ServerFailure('Unable to load daily stats. Please try again.'));
     }
   }
 
@@ -52,10 +64,9 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     try {
       final userId = authRepository.currentUser?.id;
       if (userId == null) {
-        return Left(ServerFailure('User not authenticated'));
+        return const Left(AuthFailure('Please sign in again to continue.'));
       }
 
-      // Ensure weekStart is the start of the week (Monday)
       final startOfWeek = weekStart.subtract(
         Duration(days: weekStart.weekday - 1),
       );
@@ -72,7 +83,6 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         endOfWeek,
       );
 
-      // Group logs by day
       final Map<String, List<FoodLogModel>> logsByDay = {};
       for (final log in logs) {
         final dateKey =
@@ -80,7 +90,6 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         logsByDay[dateKey] = [...(logsByDay[dateKey] ?? []), log];
       }
 
-      // Create daily breakdown
       final List<DailyStats> dailyBreakdown = [];
       for (int i = 0; i < 7; i++) {
         final day = startOfDay.add(Duration(days: i));
@@ -119,8 +128,17 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         dailyBreakdown: dailyBreakdown,
         topJunkFoods: logs.getTopJunkFoods(),
       ));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } on PostgrestException catch (e) {
+      AppLogger.error('Failed to getWeeklyStats', e);
+      return Left(ServerFailure(e.message));
+    } on SocketException catch (e, stackTrace) {
+      AppLogger.error('Failed to getWeeklyStats: no internet', e, stackTrace);
+      return const Left(
+        NetworkFailure('Please check your internet connection and try again.'),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to getWeeklyStats', e, stackTrace);
+      return Left(ServerFailure('Unable to load weekly stats. Please try again.'));
     }
   }
 
@@ -132,7 +150,7 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
     try {
       final userId = authRepository.currentUser?.id;
       if (userId == null) {
-        return Left(ServerFailure('User not authenticated'));
+        return const Left(AuthFailure('Please sign in again to continue.'));
       }
 
       final startOfMonth = DateTime(year, month, 1);
@@ -145,7 +163,6 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         endOfMonth,
       );
 
-      // Group logs by day
       final Map<String, List<FoodLogModel>> logsByDay = {};
       for (final log in logs) {
         final dateKey =
@@ -153,7 +170,6 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         logsByDay[dateKey] = [...(logsByDay[dateKey] ?? []), log];
       }
 
-      // Create daily breakdown
       final List<DailyStats> dailyBreakdown = [];
       for (int i = 0; i < daysInMonth; i++) {
         final day = startOfMonth.add(Duration(days: i));
@@ -196,8 +212,17 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
         dailyBreakdown: dailyBreakdown,
         topJunkFoods: logs.getTopJunkFoods(),
       ));
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
+    } on PostgrestException catch (e) {
+      AppLogger.error('Failed to getMonthlyStats', e);
+      return Left(ServerFailure(e.message));
+    } on SocketException catch (e, stackTrace) {
+      AppLogger.error('Failed to getMonthlyStats: no internet', e, stackTrace);
+      return const Left(
+        NetworkFailure('Please check your internet connection and try again.'),
+      );
+    } catch (e, stackTrace) {
+      AppLogger.error('Failed to getMonthlyStats', e, stackTrace);
+      return Left(ServerFailure('Unable to load monthly stats. Please try again.'));
     }
   }
 }
