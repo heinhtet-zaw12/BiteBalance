@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/analytics/domain/entities/analytics_stats.dart';
 import 'package:bite_balance/features/food_log/data/models/food_log_model.dart';
 
@@ -21,24 +22,28 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
     DateTime start,
     DateTime end,
   ) async {
-    final response = await client
-        .from('food_logs')
-        .select()
-        .eq('user_id', userId)
-        .gte('created_at', start.toIso8601String())
-        .lt('created_at', end.toIso8601String())
-        .order('created_at', ascending: false);
+    try {
+      final response = await client
+          .from('food_logs')
+          .select()
+          .eq('user_id', userId)
+          .gte('created_at', start.toIso8601String())
+          .lt('created_at', end.toIso8601String())
+          .order('created_at', ascending: false);
 
-    return (response as List)
-        .map((json) => FoodLogModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+      return (response as List)
+          .map((json) => FoodLogModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: getLogsByDateRange', e, stackTrace);
+      rethrow;
+    }
   }
 }
 
 // Helper extension to convert FoodLogModel list to stats
 extension FoodLogStatsExtension on List<FoodLogModel> {
   List<FoodItemStats> getTopJunkFoods({int limit = 3}) {
-    // Group by food name and count
     final Map<String, FoodItemStats> grouped = {};
     for (final log in this) {
       if (log.isJunk) {
@@ -59,7 +64,6 @@ extension FoodLogStatsExtension on List<FoodLogModel> {
       }
     }
 
-    // Sort by count descending and take top N
     final sorted = grouped.values.toList()
       ..sort((a, b) => b.count.compareTo(a.count));
 

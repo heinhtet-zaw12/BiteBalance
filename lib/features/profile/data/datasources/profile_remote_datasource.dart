@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/profile/data/models/profile_model.dart';
 
 abstract class ProfileRemoteDataSource {
@@ -13,27 +14,37 @@ class ProfileRemoteDataSourceImpl implements ProfileRemoteDataSource {
 
   @override
   Future<ProfileModel> getProfile(String userId) async {
-    final response = await client
-        .from('profiles')
-        .select()
-        .eq('id', userId)
-        .maybeSingle();
+    try {
+      final response = await client
+          .from('profiles')
+          .select()
+          .eq('id', userId)
+          .maybeSingle();
 
-    if (response == null) {
-      throw Exception('Profile not found');
+      if (response == null) {
+        throw Exception('Profile not found');
+      }
+
+      return ProfileModel.fromJson(response);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: getProfile', e, stackTrace);
+      rethrow;
     }
-
-    return ProfileModel.fromJson(response);
   }
 
   @override
   Future<ProfileModel> saveProfile(ProfileModel profile) async {
-    final response = await client
-        .from('profiles')
-        .upsert(profile.toJson())
-        .select()
-        .single();
+    try {
+      final response = await client
+          .from('profiles')
+          .upsert(profile.toJson())
+          .select()
+          .single();
 
-    return ProfileModel.fromJson(response);
+      return ProfileModel.fromJson(response);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: saveProfile', e, stackTrace);
+      rethrow;
+    }
   }
 }

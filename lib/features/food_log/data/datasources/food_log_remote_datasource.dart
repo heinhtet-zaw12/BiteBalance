@@ -1,4 +1,5 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/food_log/data/models/food_log_model.dart';
 
 abstract class FoodLogRemoteDataSource {
@@ -14,39 +15,54 @@ class FoodLogRemoteDataSourceImpl implements FoodLogRemoteDataSource {
 
   @override
   Future<FoodLogModel> logFood(FoodLogModel foodLog) async {
-    final response = await client
-        .from('food_logs')
-        .insert(foodLog.toJson())
-        .select()
-        .single();
+    try {
+      final response = await client
+          .from('food_logs')
+          .insert(foodLog.toJson())
+          .select()
+          .single();
 
-    return FoodLogModel.fromJson(response);
+      return FoodLogModel.fromJson(response);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: logFood', e, stackTrace);
+      rethrow;
+    }
   }
 
   @override
   Future<List<FoodLogModel>> getDailyLogs(String userId, DateTime date) async {
-    final startOfDay = DateTime(date.year, date.month, date.day);
-    final endOfDay = startOfDay.add(const Duration(days: 1));
+    try {
+      final startOfDay = DateTime(date.year, date.month, date.day);
+      final endOfDay = startOfDay.add(const Duration(days: 1));
 
-    final response = await client
-        .from('food_logs')
-        .select()
-        .eq('user_id', userId)
-        .gte('created_at', startOfDay.toIso8601String())
-        .lt('created_at', endOfDay.toIso8601String())
-        .order('created_at', ascending: false);
+      final response = await client
+          .from('food_logs')
+          .select()
+          .eq('user_id', userId)
+          .gte('created_at', startOfDay.toIso8601String())
+          .lt('created_at', endOfDay.toIso8601String())
+          .order('created_at', ascending: false);
 
-    return (response as List)
-        .map((json) => FoodLogModel.fromJson(json as Map<String, dynamic>))
-        .toList();
+      return (response as List)
+          .map((json) => FoodLogModel.fromJson(json as Map<String, dynamic>))
+          .toList();
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: getDailyLogs', e, stackTrace);
+      rethrow;
+    }
   }
 
   @override
   Future<void> deleteFoodLog(String userId, String id) async {
-    await client
-        .from('food_logs')
-        .delete()
-        .eq('user_id', userId)
-        .eq('id', id);
+    try {
+      await client
+          .from('food_logs')
+          .delete()
+          .eq('user_id', userId)
+          .eq('id', id);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: deleteFoodLog', e, stackTrace);
+      rethrow;
+    }
   }
 }

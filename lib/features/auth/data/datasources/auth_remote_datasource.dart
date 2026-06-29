@@ -1,5 +1,7 @@
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/auth/data/models/user_model.dart';
+import 'package:bite_balance/features/auth/domain/exceptions/email_confirmation_needed.dart';
 
 abstract class AuthRemoteDataSource {
   Future<UserModel> signIn({
@@ -27,16 +29,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    final response = await client.auth.signInWithPassword(
-      email: email,
-      password: password,
-    );
+    try {
+      final response = await client.auth.signInWithPassword(
+        email: email,
+        password: password,
+      );
 
-    if (response.user == null) {
-      throw Exception('Login failed: No user returned');
+      if (response.user == null) {
+        throw Exception('Login failed: No user returned');
+      }
+
+      return UserModel.fromSupabaseUser(response.user!);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: signIn', e, stackTrace);
+      rethrow;
     }
-
-    return UserModel.fromSupabaseUser(response.user!);
   }
 
   @override
@@ -44,21 +51,35 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    final response = await client.auth.signUp(
-      email: email,
-      password: password,
-    );
+    try {
+      final response = await client.auth.signUp(
+        email: email,
+        password: password,
+      );
 
-    if (response.user == null) {
-      throw Exception('Registration failed: No user returned');
+      if (response.user == null) {
+        throw Exception('Registration failed: No user returned');
+      }
+
+      if (response.session == null) {
+        throw EmailConfirmationNeededException(email);
+      }
+
+      return UserModel.fromSupabaseUser(response.user!);
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: signUp', e, stackTrace);
+      rethrow;
     }
-
-    return UserModel.fromSupabaseUser(response.user!);
   }
 
   @override
   Future<void> signOut() async {
-    await client.auth.signOut();
+    try {
+      await client.auth.signOut();
+    } catch (e, stackTrace) {
+      AppLogger.error('Supabase error: signOut', e, stackTrace);
+      rethrow;
+    }
   }
 
   @override
