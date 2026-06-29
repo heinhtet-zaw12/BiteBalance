@@ -1,36 +1,49 @@
 import 'package:fpdart/fpdart.dart';
 import 'package:bite_balance/core/errors/failures.dart';
-import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/core/usecases/usecase.dart';
 import 'package:bite_balance/features/profile/domain/entities/calorie_recommendation.dart';
-import 'package:bite_balance/features/profile/data/datasources/gemini_calorie_datasource.dart';
 
 class GetCalorieRecommendation
     implements UseCase<CalorieRecommendation, GetCalorieRecommendationParams> {
-  final GeminiCalorieDataSource dataSource;
 
-  GetCalorieRecommendation(this.dataSource);
+  const GetCalorieRecommendation();
 
   @override
   Future<Either<Failure, CalorieRecommendation>> call(
     GetCalorieRecommendationParams params,
   ) async {
-    try {
-      final result = await dataSource.getCalorieRecommendation(
-        weightKg: params.weightKg,
-        heightCm: params.heightCm,
-        goal: params.goal,
-      );
+    final bmr = (10 * params.weightKg) + (6.25 * params.heightCm) - 5;
+    final tdee = bmr * 1.55; // moderate activity
 
-      return Right(CalorieRecommendation(
-        dailyCalorieTarget: result.dailyCalorieTarget,
-        healthyRatio: result.healthyRatio,
-        reasoning: result.reasoning,
-      ));
-    } catch (e, stackTrace) {
-      AppLogger.error('Failed to getCalorieRecommendation', e, stackTrace);
-      return Left(ServerFailure('Unable to get calorie recommendation. Please try again.'));
+    double calorieAdjustment;
+    double healthyRatio;
+    String goalLabel;
+
+    switch (params.goal) {
+      case 'lose':
+        calorieAdjustment = -500;
+        healthyRatio = 0.85;
+        goalLabel = 'weight loss';
+      case 'gain':
+        calorieAdjustment = 400;
+        healthyRatio = 0.75;
+        goalLabel = 'weight gain';
+      case 'maintain':
+      default:
+        calorieAdjustment = 0;
+        healthyRatio = 0.80;
+        goalLabel = 'maintenance';
     }
+
+    final target = (tdee + calorieAdjustment).clamp(1200.0, double.infinity);
+
+    return Right(CalorieRecommendation(
+      dailyCalorieTarget: target,
+      healthyRatio: healthyRatio,
+      reasoning: 'Based on Mifflin-St Jeor: BMR ${bmr.round()} kcal, '
+          'TDEE ${tdee.round()} kcal (moderate activity). '
+          'Adjusted for $goalLabel: ${target.round()} kcal/day.',
+    ));
   }
 }
 
