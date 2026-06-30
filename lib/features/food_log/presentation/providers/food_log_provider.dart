@@ -2,8 +2,10 @@ import 'dart:io';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/food_log/data/datasources/food_log_remote_datasource.dart';
+import 'package:bite_balance/features/food_log/data/datasources/gemini_client.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_vision_datasource.dart';
 import 'package:bite_balance/features/food_log/data/repositories/food_log_repository_impl.dart';
@@ -19,12 +21,20 @@ final foodLogRemoteDataSourceProvider = Provider<FoodLogRemoteDataSource>((ref) 
   return FoodLogRemoteDataSourceImpl(Supabase.instance.client);
 });
 
+final geminiClientProvider = Provider<GeminiClient>((ref) {
+  return GeminiClient([
+    dotenv.get('GEMINI_API_KEY_1'),
+    dotenv.get('GEMINI_API_KEY_2'),
+    dotenv.get('GEMINI_API_KEY_3'),
+  ]);
+});
+
 final geminiDataSourceProvider = Provider<GeminiDataSource>((ref) {
-  return GeminiDataSourceImpl(dotenv.get('GEMINI_API_KEY'));
+  return GeminiDataSourceImpl(ref.read(geminiClientProvider));
 });
 
 final geminiVisionDataSourceProvider = Provider<GeminiVisionDataSource>((ref) {
-  return GeminiVisionDataSourceImpl(dotenv.get('GEMINI_API_KEY'));
+  return GeminiVisionDataSourceImpl(ref.read(geminiClientProvider));
 });
 
 // Repository provider
@@ -93,7 +103,7 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
     result.fold(
       (failure) => state = state.copyWith(
         isAnalyzing: false,
-        error: failure.message,
+        error: ErrorHandler.message(failure),
       ),
       (analysis) => state = state.copyWith(
         isAnalyzing: false,
@@ -112,7 +122,7 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
     result.fold(
       (failure) => state = state.copyWith(
         isAnalyzing: false,
-        error: failure.message,
+        error: ErrorHandler.message(failure),
       ),
       (analysis) => state = state.copyWith(
         isAnalyzing: false,
@@ -146,7 +156,10 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
 
     return result.fold(
       (failure) {
-        state = state.copyWith(isSaving: false, error: failure.message);
+        state = state.copyWith(
+          isSaving: false,
+          error: ErrorHandler.message(failure),
+        );
         return false;
       },
       (_) {
@@ -181,7 +194,7 @@ class DailyLogsNotifier extends AsyncNotifier<List<FoodLog>> {
         GetDailyLogsParams(userId: user.id, date: date),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (logs) => logs,
       );
     });
