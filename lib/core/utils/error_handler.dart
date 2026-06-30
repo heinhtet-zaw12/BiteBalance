@@ -105,6 +105,10 @@ class ErrorHandler {
     if (msg.contains('too many requests') || msg.contains('rate limit')) {
       return 'Too many failed attempts. Please wait a few minutes.';
     }
+    if (msg.contains('temporarily unavailable') ||
+        msg.contains('quota')) {
+      return 'AI analysis is temporarily unavailable. Please try again in a few minutes.';
+    }
     if (msg.contains('network') || msg.contains('connection')) {
       return 'No internet connection. Please try again.';
     }
