@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:bite_balance/features/food_log/data/datasources/gemini_client.dart';
 import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
 
@@ -9,13 +10,9 @@ abstract class GeminiVisionDataSource {
 }
 
 class GeminiVisionDataSourceImpl implements GeminiVisionDataSource {
-  final GenerativeModel _model;
+  final GeminiClient _client;
 
-  GeminiVisionDataSourceImpl(String apiKey)
-      : _model = GenerativeModel(
-          model: 'gemini-2.5-flash-lite',
-          apiKey: apiKey,
-        );
+  GeminiVisionDataSourceImpl(GeminiClient client) : _client = client;
 
   @override
   Future<FoodAnalysisResult> analyzeFoodImage(File imageFile) async {
@@ -45,7 +42,7 @@ Rules:
         bytes,
       );
 
-      final response = await _model.generateContent([
+      final response = await _client.generateContent([
         Content.multi([prompt, imagePart]),
       ]);
 
