@@ -16,6 +16,8 @@ class AnalyzeFoodImage implements UseCase<FoodAnalysisResult, AnalyzeFoodImagePa
     try {
       final result = await visionDataSource.analyzeFoodImage(params.imageFile);
       return Right(result);
+    } on QuotaExhaustedException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to analyzeFoodImage', e, stackTrace);
       return Left(ServerFailure('Unable to analyze food image. Please try again.'));

@@ -14,6 +14,8 @@ class AnalyzeFood implements UseCase<FoodAnalysisResult, AnalyzeFoodParams> {
     try {
       final result = await geminiDataSource.analyzeFood(params.foodDescription);
       return Right(result);
+    } on QuotaExhaustedException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to analyzeFood', e, stackTrace);
       return Left(ServerFailure('Unable to analyze food. Please try again.'));
