@@ -1,6 +1,7 @@
 import 'dart:convert';
-import 'package:google_generative_ai/google_generative_ai.dart';
+import 'package:bite_balance/features/food_log/data/datasources/gemini_client.dart';
 import 'package:bite_balance/core/utils/app_logger.dart';
+import 'package:google_generative_ai/google_generative_ai.dart';
 
 class FoodAnalysisResult {
   final String foodName;
@@ -30,13 +31,9 @@ abstract class GeminiDataSource {
 }
 
 class GeminiDataSourceImpl implements GeminiDataSource {
-  final GenerativeModel _model;
+  final GeminiClient _client;
 
-  GeminiDataSourceImpl(String apiKey)
-      : _model = GenerativeModel(
-          model: 'gemini-2.5-flash-lite',
-          apiKey: apiKey,
-        );
+  GeminiDataSourceImpl(GeminiClient client) : _client = client;
 
   @override
   Future<FoodAnalysisResult> analyzeFood(String foodDescription) async {
@@ -61,7 +58,7 @@ Rules:
 - Keep food_name concise
 ''';
 
-      final response = await _model.generateContent([Content.text(prompt)]);
+      final response = await _client.generateContent([Content.text(prompt)]);
       final text = response.text?.trim() ?? '{}';
 
       final jsonString = text
