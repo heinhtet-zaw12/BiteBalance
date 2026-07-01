@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:flutter_web_plugins/flutter_web_plugins.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import 'package:bite_balance/core/constants/app_theme.dart';
@@ -23,6 +24,7 @@ Future<void> main() async {
     rethrow;
   }
 
+  usePathUrlStrategy();
   runApp(const ProviderScope(child: MyApp()));
 }
 
