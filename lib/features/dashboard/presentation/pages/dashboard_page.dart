@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/core/utils/responsive.dart';
 import 'package:bite_balance/features/dashboard/presentation/providers/dashboard_provider.dart';
 import 'package:bite_balance/features/dashboard/presentation/widgets/calorie_summary_card.dart';
@@ -129,6 +130,14 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                   'Something went wrong',
                   style: Theme.of(context).textTheme.headlineMedium,
                 ),
+                const SizedBox(height: 8),
+                Text(
+                  ErrorHandler.message(error),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: AppTheme.textSecondary,
+                  ),
+                ),
                 const SizedBox(height: 24),
                 ElevatedButton.icon(
                   onPressed: () {
@@ -155,9 +164,12 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             onRefresh: () async {
               ref.read(dashboardProvider.notifier).loadSummary();
             },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: Responsive.pagePadding(context),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  padding: Responsive.pagePadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -312,6 +324,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                 ],
               ),
             ),
+          ),
+          ),
           );
         },
       ),
@@ -376,14 +390,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
               ),
               const SizedBox(height: 8),
               Text(
-                'Start tracking your meals',
+                'Tap the + button to log your first meal',
                 style: Theme.of(context).textTheme.bodySmall,
-              ),
-              const SizedBox(height: 20),
-              ElevatedButton.icon(
-                onPressed: () => context.push('/food-log'),
-                icon: const Icon(Icons.add_rounded),
-                label: const Text('Log Your First Meal'),
               ),
             ],
           ),

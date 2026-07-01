@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 
 import 'package:bite_balance/features/analytics/presentation/pages/analytics_page.dart';
+import 'package:bite_balance/features/auth/presentation/pages/email_confirmation_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/login_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/register_page.dart';
 import 'package:bite_balance/features/dashboard/presentation/pages/dashboard_page.dart';
@@ -24,6 +25,13 @@ final GoRouter appRouter = GoRouter(
     GoRoute(
       path: '/register',
       builder: (context, state) => const RegisterPage(),
+    ),
+    GoRoute(
+      path: '/email-confirmation',
+      builder: (context, state) {
+        final email = state.uri.queryParameters['email'] ?? '';
+        return EmailConfirmationPage(email: email);
+      },
     ),
     ShellRoute(
       builder: (context, state, child) => MainScaffold(child: child),

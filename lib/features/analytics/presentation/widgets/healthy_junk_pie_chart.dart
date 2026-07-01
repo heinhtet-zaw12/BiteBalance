@@ -66,8 +66,8 @@ class HealthyJunkPieChart extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      borderSide: const BorderSide(
-                        color: Colors.white,
+                      borderSide: BorderSide(
+                        color: AppTheme.background,
                         width: 2,
                       ),
                     ),
@@ -83,8 +83,8 @@ class HealthyJunkPieChart extends StatelessWidget {
                         fontWeight: FontWeight.bold,
                         color: Colors.white,
                       ),
-                      borderSide: const BorderSide(
-                        color: Colors.white,
+                      borderSide: BorderSide(
+                        color: AppTheme.background,
                         width: 2,
                       ),
                     ),

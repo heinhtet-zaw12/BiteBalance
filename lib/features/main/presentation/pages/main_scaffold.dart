@@ -66,9 +66,12 @@ class _MainScaffoldState extends State<MainScaffold> {
           Container(
             width: Responsive.sidebarWidth,
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: AppTheme.surface.withValues(alpha: 0.85),
               border: Border(
-                right: BorderSide(color: AppTheme.divider, width: 1),
+                right: BorderSide(
+                  color: Colors.white.withValues(alpha: 0.06),
+                  width: 1,
+                ),
               ),
             ),
             child: Column(
@@ -157,7 +160,10 @@ class _MainScaffoldState extends State<MainScaffold> {
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
           border: Border(
-            top: BorderSide(color: AppTheme.divider, width: 1),
+            top: BorderSide(
+              color: Colors.white.withValues(alpha: 0.06),
+              width: 1,
+            ),
           ),
         ),
         child: NavigationBar(

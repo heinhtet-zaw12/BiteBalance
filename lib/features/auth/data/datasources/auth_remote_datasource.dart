@@ -61,6 +61,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         throw Exception('Registration failed: No user returned');
       }
 
+      // Check if user already exists (identities array is empty for existing users)
+      final identities = response.user!.identities;
+      if (identities != null && identities.isEmpty) {
+        throw AuthException('An account with this email already exists.');
+      }
+
       if (response.session == null) {
         throw EmailConfirmationNeededException(email);
       }

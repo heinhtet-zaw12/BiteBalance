@@ -1,10 +1,13 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/widgets/app_toast.dart';
 import 'package:bite_balance/features/food_log/presentation/providers/food_log_provider.dart';
+import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
 
 class FoodLogPage extends ConsumerStatefulWidget {
   const FoodLogPage({super.key});
@@ -17,7 +20,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   final _foodController = TextEditingController();
   final _imagePicker = ImagePicker();
   String _selectedMealType = 'lunch';
-  File? _selectedImage;
+  XFile? _selectedImage;
 
   @override
   void dispose() {
@@ -31,23 +34,21 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       imageQuality: 80,
     );
     if (image != null) {
-      setState(() => _selectedImage = File(image.path));
+      setState(() => _selectedImage = image);
     }
   }
 
   Future<void> _analyzeFood() async {
     final food = _foodController.text.trim();
     if (food.isEmpty && _selectedImage == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Enter food description or take a photo'),
-        ),
-      );
+      AppToast.show(context, message: 'Enter food description or take a photo');
       return;
     }
 
     if (_selectedImage != null) {
-      await ref.read(foodLogProvider.notifier).analyzeFoodImage(_selectedImage!);
+      await ref
+          .read(foodLogProvider.notifier)
+          .analyzeFoodImage(_selectedImage!);
     } else {
       await ref.read(foodLogProvider.notifier).analyzeFood(food);
     }
@@ -57,11 +58,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
     final success =
         await ref.read(foodLogProvider.notifier).saveFoodLog(_selectedMealType);
     if (success && mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: const Text('Food logged successfully!'),
-          backgroundColor: AppTheme.success,
-        ),
+      AppToast.show(
+        context,
+        message: 'Food logged successfully!',
+        backgroundColor: AppTheme.success,
       );
       context.pop();
     }
@@ -74,257 +74,306 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
   @override
   Widget build(BuildContext context) {
     final foodLogState = ref.watch(foodLogProvider);
+    final profile = ref.watch(profileProvider).maybeWhen(
+          data: (p) => p,
+          orElse: () => null,
+        );
+    final isProfileComplete = profile?.weight != null &&
+        profile?.height != null &&
+        profile?.goal != null;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Log Food'),
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(24),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            // Header Card
-            Container(
-              padding: const EdgeInsets.all(28),
-              decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  colors: [
-                    AppTheme.primary,
-                    AppTheme.primaryDark,
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.circular(24),
-                boxShadow: [
-                  BoxShadow(
-                    color: AppTheme.primary.withValues(alpha: 0.3),
-                    blurRadius: 20,
-                    offset: const Offset(0, 10),
+      body: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.all(24),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // ── Header Card ──
+                Container(
+                  constraints: const BoxConstraints(maxHeight: 180),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 28,
+                    vertical: 20,
                   ),
-                ],
-              ),
-              child: Column(
-                children: [
-                  Container(
-                    width: 64,
-                    height: 64,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(18),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        AppTheme.primary,
+                        AppTheme.secondary,
+                        AppTheme.accent,
+                      ],
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
                     ),
-                    child: const Icon(
-                      Icons.auto_awesome_rounded,
-                      size: 32,
-                      color: Colors.white,
-                    ),
+                    borderRadius: BorderRadius.circular(24),
+                    boxShadow: [
+                      BoxShadow(
+                        color: AppTheme.primary.withValues(alpha: 0.3),
+                        blurRadius: 20,
+                        offset: const Offset(0, 10),
+                      ),
+                    ],
                   ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'AI Food Analysis',
-                    style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                          color: Colors.white,
-                        ),
-                  ),
-                  const SizedBox(height: 8),
-                  Text(
-                    'Describe your meal or upload a photo',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.white70,
-                        ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 28),
-
-            // Photo Section
-            if (_selectedImage != null) ...[
-              // Image Preview
-              Stack(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
-                    child: Image.file(
-                      _selectedImage!,
-                      height: 200,
-                      width: double.infinity,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  Positioned(
-                    top: 8,
-                    right: 8,
-                    child: GestureDetector(
-                      onTap: _clearImage,
-                      child: Container(
-                        padding: const EdgeInsets.all(8),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Container(
+                        width: 48,
+                        height: 48,
                         decoration: BoxDecoration(
-                          color: Colors.black54,
-                          borderRadius: BorderRadius.circular(20),
+                          color: Colors.white.withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(14),
                         ),
                         child: const Icon(
-                          Icons.close,
+                          Icons.auto_awesome_rounded,
+                          size: 26,
                           color: Colors.white,
-                          size: 18,
                         ),
                       ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ] else ...[
-              // Gallery Button
-              _buildPhotoButton(
-                icon: Icons.photo_library_rounded,
-                label: 'Pick from Gallery',
-                onTap: _pickFromGallery,
-              ),
-              const SizedBox(height: 20),
-
-              // Divider with "OR"
-              Row(
-                children: [
-                  const Expanded(child: Divider()),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    child: Text(
-                      'OR',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: AppTheme.textTertiary,
-                          ),
-                    ),
-                  ),
-                  const Expanded(child: Divider()),
-                ],
-              ),
-              const SizedBox(height: 20),
-            ],
-
-            // Food Input
-            TextFormField(
-              controller: _foodController,
-              maxLines: 3,
-              style: Theme.of(context).textTheme.bodyLarge,
-              decoration: const InputDecoration(
-                labelText: 'Food Description',
-                hintText:
-                    'e.g., Grilled chicken salad with olive oil dressing',
-                alignLabelWithHint: true,
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Meal Type Selection
-            Text(
-              'Meal Type',
-              style: Theme.of(context).textTheme.titleMedium,
-            ),
-            const SizedBox(height: 12),
-            Wrap(
-              spacing: 10,
-              runSpacing: 10,
-              children: [
-                _buildMealChip(
-                    'breakfast', 'Breakfast', Icons.free_breakfast_rounded),
-                _buildMealChip('lunch', 'Lunch', Icons.lunch_dining_rounded),
-                _buildMealChip(
-                    'dinner', 'Dinner', Icons.dinner_dining_rounded),
-                _buildMealChip('snack', 'Snack', Icons.cookie_rounded),
-              ],
-            ),
-            const SizedBox(height: 32),
-
-            // Analyze Button
-            SizedBox(
-              height: 56,
-              child: ElevatedButton.icon(
-                onPressed: foodLogState.isAnalyzing ? null : _analyzeFood,
-                icon: foodLogState.isAnalyzing
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2.5,
-                          color: Colors.white,
-                        ),
-                      )
-                    : const Icon(Icons.auto_awesome),
-                label: Text(
-                    foodLogState.isAnalyzing ? 'Analyzing...' : 'Analyze'),
-              ),
-            ),
-            const SizedBox(height: 24),
-
-            // Error Message
-            if (foodLogState.error != null)
-              Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: AppTheme.error.withValues(alpha: 0.08),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(
-                    color: AppTheme.error.withValues(alpha: 0.2),
+                      const SizedBox(height: 12),
+                      Text(
+                        'AI Food Analysis',
+                        style: Theme.of(context)
+                            .textTheme
+                            .headlineMedium
+                            ?.copyWith(color: Colors.white),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Describe your meal or upload a photo',
+                        style: Theme.of(context)
+                            .textTheme
+                            .bodyMedium
+                            ?.copyWith(color: Colors.white70),
+                      ),
+                    ],
                   ),
                 ),
-                child: Row(
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: AppTheme.error.withValues(alpha: 0.12),
-                        borderRadius: BorderRadius.circular(12),
+                const SizedBox(height: 28),
+
+                // ── Photo Section ──
+                if (_selectedImage != null) ...[
+                  Stack(
+                    children: [
+                      ClipRRect(
+                        borderRadius: BorderRadius.circular(16),
+                        child: kIsWeb
+                            ? Image.network(
+                                _selectedImage!.path,
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              )
+                            : Image.file(
+                                File(_selectedImage!.path),
+                                height: 200,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
+                              ),
                       ),
-                      child: const Icon(
-                        Icons.error_outline_rounded,
-                        color: AppTheme.error,
-                        size: 20,
+                      Positioned(
+                        top: 8,
+                        right: 8,
+                        child: GestureDetector(
+                          onTap: _clearImage,
+                          child: Container(
+                            padding: const EdgeInsets.all(8),
+                            decoration: BoxDecoration(
+                              color: Colors.black54,
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: const Icon(
+                              Icons.close,
+                              color: Colors.white,
+                              size: 18,
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ] else ...[
+                  _buildPhotoButton(
+                    icon: Icons.photo_library_rounded,
+                    label: 'Pick from Gallery',
+                    onTap: _pickFromGallery,
+                  ),
+                  const SizedBox(height: 20),
+
+                  // Divider with "OR"
+                  Row(
+                    children: [
+                      const Expanded(child: Divider()),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        child: Text(
+                          'OR',
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: AppTheme.textTertiary,
+                                  ),
+                        ),
+                      ),
+                      const Expanded(child: Divider()),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                ],
+
+                // ── Food Input ──
+                TextFormField(
+                  controller: _foodController,
+                  maxLines: 3,
+                  style: Theme.of(context).textTheme.bodyLarge,
+                  decoration: const InputDecoration(
+                    labelText: 'Food Description',
+                    hintText:
+                        'e.g., Grilled chicken salad with olive oil dressing',
+                    alignLabelWithHint: true,
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // ── Meal Type Selection ──
+                Text(
+                  'Meal Type',
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const SizedBox(height: 12),
+                Wrap(
+                  spacing: 10,
+                  runSpacing: 10,
+                  children: [
+                    _buildMealChip(
+                        'breakfast', 'Breakfast', Icons.free_breakfast_rounded),
+                    _buildMealChip(
+                        'lunch', 'Lunch', Icons.lunch_dining_rounded),
+                    _buildMealChip(
+                        'dinner', 'Dinner', Icons.dinner_dining_rounded),
+                    _buildMealChip('snack', 'Snack', Icons.cookie_rounded),
+                  ],
+                ),
+                const SizedBox(height: 32),
+
+                // ── Analyze Button ──
+                SizedBox(
+                  height: 56,
+                  child: ElevatedButton.icon(
+                    onPressed:
+                        foodLogState.isAnalyzing ? null : _analyzeFood,
+                    icon: foodLogState.isAnalyzing
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.5,
+                              color: Colors.white,
+                            ),
+                          )
+                        : const Icon(Icons.auto_awesome),
+                    label: Text(foodLogState.isAnalyzing
+                        ? 'Analyzing...'
+                        : 'Analyze'),
+                  ),
+                ),
+                const SizedBox(height: 24),
+
+                // ── Error Message ──
+                if (foodLogState.error != null)
+                  Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: AppTheme.error.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(
+                        color: AppTheme.error.withValues(alpha: 0.2),
                       ),
                     ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        foodLogState.error!,
-                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                              color: AppTheme.error,
-                            ),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 40,
+                          height: 40,
+                          decoration: BoxDecoration(
+                            color: AppTheme.error.withValues(alpha: 0.12),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(
+                            Icons.error_outline_rounded,
+                            color: AppTheme.error,
+                            size: 20,
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            foodLogState.error!,
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(color: AppTheme.error),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
+                // ── Analysis Result Card ──
+                if (foodLogState.analysis != null) ...[
+                  _buildResultCard(foodLogState),
+                  const SizedBox(height: 24),
+
+                  // Confirm Button
+                  Tooltip(
+                    message: isProfileComplete
+                        ? ''
+                        : 'Complete your profile first to save food logs',
+                    triggerMode: isProfileComplete
+                        ? TooltipTriggerMode.manual
+                        : TooltipTriggerMode.tap,
+                    child: SizedBox(
+                      height: 56,
+                      child: ElevatedButton.icon(
+                        onPressed: foodLogState.isSaving || !isProfileComplete
+                            ? null
+                            : _saveFoodLog,
+                        icon: foodLogState.isSaving
+                            ? const SizedBox(
+                                width: 20,
+                                height: 20,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2.5,
+                                  color: Colors.white,
+                                ),
+                              )
+                            : const Icon(Icons.check_circle_rounded),
+                        label: Text(
+                            foodLogState.isSaving ? 'Saving...' : 'Save to Log'),
+                      ),
+                    ),
+                  ),
+                  if (!isProfileComplete) ...[
+                    const SizedBox(height: 8),
+                    Center(
+                      child: TextButton(
+                        onPressed: () => context.push('/profile-setup'),
+                        child: const Text('Complete your profile first'),
                       ),
                     ),
                   ],
-                ),
-              ),
-
-            // Analysis Result Card
-            if (foodLogState.analysis != null) ...[
-              _buildResultCard(foodLogState),
-              const SizedBox(height: 24),
-
-              // Confirm Button
-              SizedBox(
-                height: 56,
-                child: ElevatedButton.icon(
-                  onPressed: foodLogState.isSaving ? null : _saveFoodLog,
-                  icon: foodLogState.isSaving
-                      ? const SizedBox(
-                          width: 20,
-                          height: 20,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.5,
-                            color: Colors.white,
-                          ),
-                        )
-                      : const Icon(Icons.check_circle_rounded),
-                  label:
-                      Text(foodLogState.isSaving ? 'Saving...' : 'Save to Log'),
-                ),
-              ),
-            ],
-          ],
+                ],
+              ],
+            ),
+          ),
         ),
       ),
     );
@@ -339,7 +388,8 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       onTap: onTap,
       borderRadius: BorderRadius.circular(16),
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        constraints: const BoxConstraints(maxHeight: 120),
+        padding: const EdgeInsets.symmetric(vertical: 14),
         decoration: BoxDecoration(
           color: AppTheme.primary.withValues(alpha: 0.04),
           borderRadius: BorderRadius.circular(16),
@@ -349,10 +399,11 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
           ),
         ),
         child: Column(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Container(
-              width: 44,
-              height: 44,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: AppTheme.primary.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(12),
@@ -360,10 +411,10 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
               child: Icon(
                 icon,
                 color: AppTheme.primary,
-                size: 28,
+                size: 24,
               ),
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               label,
               style: Theme.of(context).textTheme.titleSmall?.copyWith(

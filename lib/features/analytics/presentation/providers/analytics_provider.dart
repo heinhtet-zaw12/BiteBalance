@@ -40,6 +40,13 @@ final getMonthlyStatsProvider = Provider<GetMonthlyStats>((ref) {
 enum AnalyticsTab { daily, weekly, monthly }
 
 final analyticsTabProvider = StateProvider<AnalyticsTab>((ref) {
+  // Reset tab when user changes (logout or different user login)
+  ref.listen(authProvider, (previous, next) {
+    if (previous?.value?.id != next.value?.id) {
+      ref.invalidateSelf();
+    }
+  });
+
   return AnalyticsTab.daily;
 });
 
@@ -47,6 +54,13 @@ final analyticsTabProvider = StateProvider<AnalyticsTab>((ref) {
 class DailyStatsNotifier extends AsyncNotifier<DailyStats?> {
   @override
   Future<DailyStats?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return null;
   }
 
@@ -57,7 +71,7 @@ class DailyStatsNotifier extends AsyncNotifier<DailyStats?> {
         GetDailyStatsParams(date: date),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (stats) => stats,
       );
     });
@@ -72,6 +86,13 @@ final dailyStatsProvider =
 class WeeklyStatsNotifier extends AsyncNotifier<WeeklyStats?> {
   @override
   Future<WeeklyStats?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return null;
   }
 
@@ -82,7 +103,7 @@ class WeeklyStatsNotifier extends AsyncNotifier<WeeklyStats?> {
         GetWeeklyStatsParams(weekStart: weekStart),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (stats) => stats,
       );
     });
@@ -97,6 +118,13 @@ final weeklyStatsProvider =
 class MonthlyStatsNotifier extends AsyncNotifier<MonthlyStats?> {
   @override
   Future<MonthlyStats?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return null;
   }
 
@@ -107,7 +135,7 @@ class MonthlyStatsNotifier extends AsyncNotifier<MonthlyStats?> {
         GetMonthlyStatsParams(year: year, month: month),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (stats) => stats,
       );
     });

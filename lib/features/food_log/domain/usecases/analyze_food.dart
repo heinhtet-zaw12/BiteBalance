@@ -16,6 +16,8 @@ class AnalyzeFood implements UseCase<FoodAnalysisResult, AnalyzeFoodParams> {
       return Right(result);
     } on QuotaExhaustedException catch (e) {
       return Left(ServerFailure(e.message));
+    } on ServerBusyException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to analyzeFood', e, stackTrace);
       return Left(ServerFailure('Unable to analyze food. Please try again.'));

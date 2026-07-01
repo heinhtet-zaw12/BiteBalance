@@ -157,16 +157,31 @@ class AnalyticsRepositoryImpl implements AnalyticsRepository {
       final endOfMonth = DateTime(year, month + 1, 1);
       final daysInMonth = endOfMonth.difference(startOfMonth).inDays;
 
-      final logs = await remoteDataSource.getLogsByDateRange(
+      // Query a wider UTC range to account for timezone offsets.
+      // Supabase stores created_at as UTC (timestamptz), but the user's local
+      // month boundaries may differ by up to ~14 hours from UTC. We fetch extra
+      // days on each side, then filter by the exact local calendar month below.
+      final wideStart = startOfMonth.subtract(const Duration(days: 2));
+      final wideEnd = endOfMonth.add(const Duration(days: 2));
+
+      final allLogs = await remoteDataSource.getLogsByDateRange(
         userId,
-        startOfMonth,
-        endOfMonth,
+        wideStart,
+        wideEnd,
       );
+
+      // Filter to only logs whose LOCAL date falls within the target month.
+      // createdAt is stored as UTC — .toLocal() converts to the device's
+      // timezone so the user's calendar month is respected.
+      final logs = allLogs.where((log) {
+        final local = log.createdAt.toLocal();
+        return local.year == year && local.month == month;
+      }).toList();
 
       final Map<String, List<FoodLogModel>> logsByDay = {};
       for (final log in logs) {
-        final dateKey =
-            '${log.createdAt.year}-${log.createdAt.month}-${log.createdAt.day}';
+        final local = log.createdAt.toLocal();
+        final dateKey = '${local.year}-${local.month}-${local.day}';
         logsByDay[dateKey] = [...(logsByDay[dateKey] ?? []), log];
       }
 

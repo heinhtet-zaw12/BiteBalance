@@ -4,51 +4,88 @@ import 'package:google_fonts/google_fonts.dart';
 class AppTheme {
   AppTheme._();
 
-  // Modern 2026 Color Palette - Warm Neutrals with Violet Accent
-  static const Color primary = Color(0xFF7C5CFC); // Soft Violet
-  static const Color primaryLight = Color(0xFFB8A9F7);
-  static const Color primaryDark = Color(0xFF5A3FD6);
-  static const Color secondary = Color(0xFFFF8FAB); // Coral Pink
-  static const Color accent = Color(0xFF00D9A6); // Mint Green
-  static const Color background = Color(0xFFFAF9FC); // Off White
-  static const Color surface = Color(0xFFFFFFFF);
-  static const Color surfaceVariant = Color(0xFFF3F1F7);
-  static const Color error = Color(0xFFEF4444);
-  static const Color success = Color(0xFF10B981);
-  static const Color textPrimary = Color(0xFF1A1A2E); // Deep Navy
-  static const Color textSecondary = Color(0xFF6B7280); // Cool Gray
-  static const Color textTertiary = Color(0xFF9CA3AF);
-  static const Color divider = Color(0xFFE5E7EB);
-  static const Color inputBorder = Color(0xFFD1D5DB);
-  static const Color inputFill = Color(0xFFF9FAFB);
+  // ── Dark Backgrounds ──────────────────────────
+  static const Color background = Color(0xFF0D0B14);
+  static const Color surface = Color(0xFF1A1725);
+  static const Color surfaceVariant = Color(0xFF231F30);
 
-  // BMI Category Colors
-  static const Color bmiUnderweight = Color(0xFFF59E0B); // Amber
-  static const Color bmiNormal = Color(0xFF10B981); // Emerald
-  static const Color bmiOverweight = Color(0xFFF97316); // Orange
-  static const Color bmiObese = Color(0xFFEF4444); // Red
+  // ── Neon Palette ──────────────────────────────
+  static const Color primary = Color(0xFF9B7BFF); // Electric Violet
+  static const Color primaryLight = Color(0xFFC4B5FD);
+  static const Color primaryDark = Color(0xFF7C5CFC);
+  static const Color secondary = Color(0xFFFF6B9D); // Hot Pink
+  static const Color accent = Color(0xFF34D399); // Muted Emerald
 
-  // Shadow presets for consistent depth
+  // ── Text ──────────────────────────────────────
+  static const Color textPrimary = Color(0xFFF0EEFF);
+  static const Color textSecondary = Color(0xFFA09BB5);
+  static const Color textTertiary = Color(0xFF6B6680);
+
+  // ── Semantic ──────────────────────────────────
+  static const Color error = Color(0xFFFF4757);
+  static const Color success = Color(0xFF34D399); // Muted Emerald
+  static const Color snackbar = Color(0xFF252235); // Elevated surface for toasts
+  static const Color divider = Color(0x14FFFFFF); // white 8%
+  static const Color inputBorder = Color(0x1AFFFFFF); // white 10%
+  static const Color inputFill = Color(0xFF1A1725);
+
+  // ── BMI Category Colors ───────────────────────
+  static const Color bmiUnderweight = Color(0xFFFFB347);
+  static const Color bmiNormal = Color(0xFF34D399);
+  static const Color bmiOverweight = Color(0xFFFF6B9D);
+  static const Color bmiObese = Color(0xFFFF4757);
+
+  // ── Gradients ─────────────────────────────────
+  static const LinearGradient heroGradient = LinearGradient(
+    colors: [Color(0xFF9B7BFF), Color(0xFFFF6B9D), Color(0xFF34D399)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  static const LinearGradient buttonGradient = LinearGradient(
+    colors: [Color(0xFF9B7BFF), Color(0xFF7C5CFC)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+
+  // ── Shadow Presets ────────────────────────────
   static List<BoxShadow> get softShadow => [
-    BoxShadow(
-      color: primary.withValues(alpha: 0.08),
-      blurRadius: 12,
-      offset: const Offset(0, 4),
-    ),
-  ];
+        BoxShadow(
+          color: primary.withValues(alpha: 0.12),
+          blurRadius: 16,
+          offset: const Offset(0, 4),
+        ),
+      ];
 
   static List<BoxShadow> get mediumShadow => [
-    BoxShadow(
-      color: primary.withValues(alpha: 0.12),
-      blurRadius: 20,
-      offset: const Offset(0, 8),
-    ),
-  ];
+        BoxShadow(
+          color: primary.withValues(alpha: 0.18),
+          blurRadius: 24,
+          offset: const Offset(0, 8),
+        ),
+      ];
 
+  // ── Glass Decoration ──────────────────────────
+  static BoxDecoration glassDecoration({
+    BorderRadius borderRadius = const BorderRadius.all(Radius.circular(20)),
+    List<BoxShadow>? boxShadow,
+  }) {
+    return BoxDecoration(
+      color: surface.withValues(alpha: 0.6),
+      borderRadius: borderRadius,
+      border: Border.all(
+        color: Colors.white.withValues(alpha: 0.08),
+        width: 1,
+      ),
+      boxShadow: boxShadow ?? softShadow,
+    );
+  }
+
+  // ── Theme Data ────────────────────────────────
   static ThemeData get lightTheme {
     final colorScheme = ColorScheme.fromSeed(
       seedColor: primary,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
     ).copyWith(
       primary: primary,
       primaryContainer: primaryLight,
@@ -65,7 +102,7 @@ class AppTheme {
 
     return ThemeData(
       useMaterial3: true,
-      brightness: Brightness.light,
+      brightness: Brightness.dark,
       colorScheme: colorScheme,
       scaffoldBackgroundColor: background,
       textTheme: _buildTextTheme(),
@@ -89,12 +126,15 @@ class AppTheme {
         ),
       ),
       cardTheme: CardThemeData(
-        color: surface,
+        color: surface.withValues(alpha: 0.6),
         elevation: 0,
         shadowColor: Colors.transparent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
-          side: BorderSide(color: divider, width: 1),
+          side: BorderSide(
+            color: Colors.white.withValues(alpha: 0.08),
+            width: 1,
+          ),
         ),
         margin: EdgeInsets.zero,
       ),
@@ -183,7 +223,10 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(14),
           ),
-          side: BorderSide(color: primary, width: 1.5),
+          side: BorderSide(
+            color: primary.withValues(alpha: 0.5),
+            width: 1.5,
+          ),
           textStyle: GoogleFonts.archivoBlack(
             fontSize: 16,
             fontWeight: FontWeight.w600,
@@ -191,10 +234,10 @@ class AppTheme {
         ).copyWith(
           overlayColor: WidgetStateProperty.resolveWith((states) {
             if (states.contains(WidgetState.pressed)) {
-              return primary.withValues(alpha: 0.12);
+              return primary.withValues(alpha: 0.15);
             }
             if (states.contains(WidgetState.hovered)) {
-              return primary.withValues(alpha: 0.06);
+              return primary.withValues(alpha: 0.08);
             }
             return null;
           }),
@@ -225,26 +268,52 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
+        backgroundColor: snackbar,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(12),
         ),
         contentTextStyle: GoogleFonts.archivoBlack(
           fontSize: 14,
           fontWeight: FontWeight.w500,
+          color: textPrimary,
         ),
       ),
       floatingActionButtonTheme: FloatingActionButtonThemeData(
         backgroundColor: primary,
         foregroundColor: Colors.white,
-        elevation: 2,
+        elevation: 4,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(16),
         ),
       ),
-      dividerTheme: DividerThemeData(
+      dividerTheme: const DividerThemeData(
         color: divider,
         thickness: 1,
         space: 1,
+      ),
+      navigationBarTheme: NavigationBarThemeData(
+        backgroundColor: surface.withValues(alpha: 0.8),
+        indicatorColor: primary.withValues(alpha: 0.2),
+        labelTextStyle: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return GoogleFonts.archivoBlack(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: primary,
+            );
+          }
+          return GoogleFonts.archivoBlack(
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+            color: textTertiary,
+          );
+        }),
+        iconTheme: WidgetStateProperty.resolveWith((states) {
+          if (states.contains(WidgetState.selected)) {
+            return const IconThemeData(color: primary, size: 24);
+          }
+          return IconThemeData(color: textTertiary, size: 24);
+        }),
       ),
     );
   }

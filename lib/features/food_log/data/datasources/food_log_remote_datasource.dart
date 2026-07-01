@@ -2,6 +2,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bite_balance/core/utils/app_logger.dart';
 import 'package:bite_balance/features/food_log/data/models/food_log_model.dart';
 
+
+
 abstract class FoodLogRemoteDataSource {
   Future<FoodLogModel> logFood(FoodLogModel foodLog);
   Future<List<FoodLogModel>> getDailyLogs(String userId, DateTime date);

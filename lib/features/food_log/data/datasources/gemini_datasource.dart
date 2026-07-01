@@ -8,12 +8,14 @@ class FoodAnalysisResult {
   final double calories;
   final bool isJunk;
   final String reason;
+  final bool isFood;
 
   const FoodAnalysisResult({
     required this.foodName,
     required this.calories,
     required this.isJunk,
     required this.reason,
+    this.isFood = true,
   });
 
   factory FoodAnalysisResult.fromJson(Map<String, dynamic> json) {
@@ -22,6 +24,7 @@ class FoodAnalysisResult {
       calories: (json['calories'] as num).toDouble(),
       isJunk: json['is_junk'] as bool,
       reason: json['reason'] as String,
+      isFood: json['is_food'] as bool? ?? true,
     );
   }
 }
@@ -45,6 +48,7 @@ Food: "$foodDescription"
 
 Return this exact JSON format:
 {
+  "is_food": true or false,
   "food_name": "short name of the food",
   "calories": estimated calories as number,
   "is_junk": true or false,
@@ -52,8 +56,10 @@ Return this exact JSON format:
 }
 
 Rules:
+- is_food: set to true ONLY if the input is an actual food or drink item. Set to false for non-food items (electronics, objects, animals, people, places, etc.)
+- If is_food is false, set calories to 0, is_junk to false, food_name to the input text, and reason to explain why it is not food
 - Estimate calories for a typical serving size
-- is_junk should be true for fast food, processed food, sugary snacks, fried food
+- is_junk should be true for fast food, processed food, sugory snacks, fried food
 - is_junk should be false for fruits, vegetables, lean protein, whole grains
 - Keep food_name concise
 ''';

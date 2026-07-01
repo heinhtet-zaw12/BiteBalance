@@ -1,12 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/core/utils/responsive.dart';
 import 'package:bite_balance/features/analytics/domain/entities/analytics_stats.dart';
 import 'package:bite_balance/features/analytics/presentation/providers/analytics_provider.dart';
 import 'package:bite_balance/features/analytics/presentation/widgets/calorie_progress_card.dart';
 import 'package:bite_balance/features/analytics/presentation/widgets/healthy_junk_pie_chart.dart';
 import 'package:bite_balance/features/analytics/presentation/widgets/junk_food_bar_chart.dart';
+import 'package:bite_balance/features/profile/domain/entities/profile.dart';
 import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
@@ -25,7 +28,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
     _tabController.addListener(_onTabChanged);
-    _loadCurrentTabData();
+    Future.microtask(() => _loadCurrentTabData());
   }
 
   @override
@@ -61,23 +64,27 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
     }
   }
 
+  bool _isProfileComplete(Profile? profile) {
+    return profile?.weight != null &&
+        profile?.height != null &&
+        profile?.goal != null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final profileState = ref.watch(profileProvider);
-    final double calorieTarget = profileState.maybeWhen(
-      data: (profile) {
-        if (profile?.weight != null &&
-            profile?.height != null &&
-            profile?.goal != null) {
-          return ref.watch(calorieRecommendationProvider).maybeWhen(
-                data: (rec) => (rec?.dailyCalorieTarget ?? 2000).toDouble(),
-                orElse: () => 2000.0,
-              );
-        }
-        return 2000.0;
-      },
-      orElse: () => 2000.0,
+    final profile = profileState.maybeWhen(
+      data: (p) => p,
+      orElse: () => null,
     );
+    final isComplete = _isProfileComplete(profile);
+
+    final double calorieTarget = isComplete
+        ? ref.watch(calorieRecommendationProvider).maybeWhen(
+              data: (rec) => (rec?.dailyCalorieTarget ?? 2000).toDouble(),
+              orElse: () => 2000.0,
+            )
+        : 2000.0;
 
     return Scaffold(
       backgroundColor: AppTheme.background,
@@ -98,21 +105,39 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
                 ],
               ),
             ),
-      body: Responsive.isDesktop(context)
-          ? _buildDesktopLayout(context, calorieTarget)
-          : TabBarView(
-              controller: _tabController,
-              children: [
-                _DailyTab(calorieTarget: calorieTarget),
-                _WeeklyTab(calorieTarget: calorieTarget),
-                _MonthlyTab(calorieTarget: calorieTarget),
-              ],
-            ),
+      body: Column(
+        children: [
+          if (!isComplete)
+            _ProfileBanner(onComplete: () => context.push('/profile-setup')),
+          Expanded(
+            child: Responsive.isDesktop(context)
+                ? _buildDesktopLayout(context, calorieTarget, isComplete)
+                : TabBarView(
+                    controller: _tabController,
+                    children: [
+                      _DailyTab(
+                        calorieTarget: calorieTarget,
+                        isProfileComplete: isComplete,
+                      ),
+                      _WeeklyTab(
+                        calorieTarget: calorieTarget,
+                        isProfileComplete: isComplete,
+                      ),
+                      _MonthlyTab(
+                        calorieTarget: calorieTarget,
+                        isProfileComplete: isComplete,
+                      ),
+                    ],
+                  ),
+          ),
+        ],
+      ),
     );
   }
 
   /// Desktop: tabs as horizontal row above content, not AppBar
-  Widget _buildDesktopLayout(BuildContext context, double calorieTarget) {
+  Widget _buildDesktopLayout(
+      BuildContext context, double calorieTarget, bool isComplete) {
     return Column(
       children: [
         // Title + Tab row
@@ -152,9 +177,18 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
           child: TabBarView(
             controller: _tabController,
             children: [
-              _DailyTab(calorieTarget: calorieTarget),
-              _WeeklyTab(calorieTarget: calorieTarget),
-              _MonthlyTab(calorieTarget: calorieTarget),
+              _DailyTab(
+                calorieTarget: calorieTarget,
+                isProfileComplete: isComplete,
+              ),
+              _WeeklyTab(
+                calorieTarget: calorieTarget,
+                isProfileComplete: isComplete,
+              ),
+              _MonthlyTab(
+                calorieTarget: calorieTarget,
+                isProfileComplete: isComplete,
+              ),
             ],
           ),
         ),
@@ -165,8 +199,12 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
 
 class _DailyTab extends ConsumerWidget {
   final double calorieTarget;
+  final bool isProfileComplete;
 
-  const _DailyTab({required this.calorieTarget});
+  const _DailyTab({
+    required this.calorieTarget,
+    required this.isProfileComplete,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -175,7 +213,7 @@ class _DailyTab extends ConsumerWidget {
     return statsState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorWidget(
-        message: error.toString(),
+        message: ErrorHandler.message(error),
         onRetry: () => ref
             .read(dailyStatsProvider.notifier)
             .loadStats(DateTime.now()),
@@ -188,6 +226,7 @@ class _DailyTab extends ConsumerWidget {
         return _StatsContent(
           stats: stats,
           calorieTarget: calorieTarget,
+          isProfileComplete: isProfileComplete,
           onRefresh: () => ref
               .read(dailyStatsProvider.notifier)
               .loadStats(DateTime.now()),
@@ -199,8 +238,12 @@ class _DailyTab extends ConsumerWidget {
 
 class _WeeklyTab extends ConsumerWidget {
   final double calorieTarget;
+  final bool isProfileComplete;
 
-  const _WeeklyTab({required this.calorieTarget});
+  const _WeeklyTab({
+    required this.calorieTarget,
+    required this.isProfileComplete,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -209,7 +252,7 @@ class _WeeklyTab extends ConsumerWidget {
     return statsState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorWidget(
-        message: error.toString(),
+        message: ErrorHandler.message(error),
         onRetry: () {
           final now = DateTime.now();
           final weekStart = now.subtract(Duration(days: now.weekday - 1));
@@ -223,17 +266,19 @@ class _WeeklyTab extends ConsumerWidget {
 
         return _ResponsiveChartLayout(
           children: [
-            CalorieProgressCard(
-              consumed: stats.totalCalories,
-              target: calorieTarget * 7,
-              title: 'Weekly Calories',
-            ),
+            if (isProfileComplete)
+              CalorieProgressCard(
+                consumed: stats.totalCalories,
+                target: calorieTarget * 7,
+                title: 'Weekly Calories',
+              ),
             HealthyJunkPieChart(
               healthyCalories: stats.healthyCalories,
               junkCalories: stats.junkCalories,
             ),
             JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
-            _WeeklyBreakdownCard(dailyBreakdown: stats.dailyBreakdown),
+            if (isProfileComplete)
+              _WeeklyBreakdownCard(dailyBreakdown: stats.dailyBreakdown),
           ],
         );
       },
@@ -243,8 +288,12 @@ class _WeeklyTab extends ConsumerWidget {
 
 class _MonthlyTab extends ConsumerWidget {
   final double calorieTarget;
+  final bool isProfileComplete;
 
-  const _MonthlyTab({required this.calorieTarget});
+  const _MonthlyTab({
+    required this.calorieTarget,
+    required this.isProfileComplete,
+  });
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -253,7 +302,7 @@ class _MonthlyTab extends ConsumerWidget {
     return statsState.when(
       loading: () => const Center(child: CircularProgressIndicator()),
       error: (error, _) => _ErrorWidget(
-        message: error.toString(),
+        message: ErrorHandler.message(error),
         onRetry: () {
           final now = DateTime.now();
           ref
@@ -269,13 +318,29 @@ class _MonthlyTab extends ConsumerWidget {
         final daysInMonth =
             DateTime(stats.year, stats.month + 1, 0).day;
 
+        final summaryItems = <_StatsInfoItem>[
+          _StatsInfoItem(
+            label: 'Days Tracked',
+            value: '${stats.totalDaysTracked}',
+            icon: Icons.calendar_today_rounded,
+          ),
+          if (isProfileComplete)
+            _StatsInfoItem(
+              label: 'Avg Daily Calories',
+              value:
+                  '${stats.averageDailyCalories.toStringAsFixed(0)} kcal',
+              icon: Icons.trending_up_rounded,
+            ),
+        ];
+
         return _ResponsiveChartLayout(
           children: [
-            CalorieProgressCard(
-              consumed: stats.totalCalories,
-              target: calorieTarget * daysInMonth,
-              title: 'Monthly Calories',
-            ),
+            if (isProfileComplete)
+              CalorieProgressCard(
+                consumed: stats.totalCalories,
+                target: calorieTarget * daysInMonth,
+                title: 'Monthly Calories',
+              ),
             HealthyJunkPieChart(
               healthyCalories: stats.healthyCalories,
               junkCalories: stats.junkCalories,
@@ -283,19 +348,7 @@ class _MonthlyTab extends ConsumerWidget {
             JunkFoodBarChart(topJunkFoods: stats.topJunkFoods),
             _StatsInfoCard(
               title: 'Monthly Summary',
-              items: [
-                _StatsInfoItem(
-                  label: 'Days Tracked',
-                  value: '${stats.totalDaysTracked}',
-                  icon: Icons.calendar_today_rounded,
-                ),
-                _StatsInfoItem(
-                  label: 'Avg Daily Calories',
-                  value:
-                      '${stats.averageDailyCalories.toStringAsFixed(0)} kcal',
-                  icon: Icons.trending_up_rounded,
-                ),
-              ],
+              items: summaryItems,
             ),
           ],
         );
@@ -331,28 +384,33 @@ class _ResponsiveChartLayout extends StatelessWidget {
       );
     }
 
-    // Tablet/Desktop: 2-column grid
+    // Tablet/Desktop: 2-column grid, capped at 800px
     return SingleChildScrollView(
       padding: padding,
-      child: Column(
-        children: [
-          // First row: progress + pie chart side by side
-          if (children.length >= 2)
-            Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Expanded(child: children[0]),
-                const SizedBox(width: 16),
-                Expanded(child: children[1]),
-              ],
-            ),
-          if (children.length >= 2) const SizedBox(height: 16),
-          // Remaining cards
-          ...children.skip(2).map((c) => Padding(
-                padding: const EdgeInsets.only(bottom: 16),
-                child: c,
-              )),
-        ],
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 800),
+          child: Column(
+            children: [
+              // First row: progress + pie chart side by side
+              if (children.length >= 2)
+                Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(child: children[0]),
+                    const SizedBox(width: 16),
+                    Expanded(child: children[1]),
+                  ],
+                ),
+              if (children.length >= 2) const SizedBox(height: 16),
+              // Remaining cards
+              ...children.skip(2).map((c) => Padding(
+                    padding: const EdgeInsets.only(bottom: 16),
+                    child: c,
+                  )),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -361,11 +419,13 @@ class _ResponsiveChartLayout extends StatelessWidget {
 class _StatsContent extends StatelessWidget {
   final DailyStats stats;
   final double calorieTarget;
+  final bool isProfileComplete;
   final VoidCallback onRefresh;
 
   const _StatsContent({
     required this.stats,
     required this.calorieTarget,
+    required this.isProfileComplete,
     required this.onRefresh,
   });
 
@@ -375,11 +435,12 @@ class _StatsContent extends StatelessWidget {
       onRefresh: () async => onRefresh(),
       child: _ResponsiveChartLayout(
         children: [
-          CalorieProgressCard(
-            consumed: stats.totalCalories,
-            target: calorieTarget,
-            title: 'Today\'s Calories',
-          ),
+          if (isProfileComplete)
+            CalorieProgressCard(
+              consumed: stats.totalCalories,
+              target: calorieTarget,
+              title: 'Today\'s Calories',
+            ),
           HealthyJunkPieChart(
             healthyCalories: stats.healthyCalories,
             junkCalories: stats.junkCalories,
@@ -664,6 +725,44 @@ class _ErrorWidget extends StatelessWidget {
               onPressed: onRetry,
               icon: const Icon(Icons.refresh_rounded),
               label: const Text('Retry'),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ProfileBanner extends StatelessWidget {
+  final VoidCallback onComplete;
+
+  const _ProfileBanner({required this.onComplete});
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: AppTheme.secondary.withValues(alpha: 0.1),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        child: Row(
+          children: [
+            Icon(
+              Icons.warning_amber_rounded,
+              color: AppTheme.secondary,
+              size: 20,
+            ),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Text(
+                'Complete your profile to see your analytics',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppTheme.textPrimary,
+                    ),
+              ),
+            ),
+            TextButton(
+              onPressed: onComplete,
+              child: const Text('Complete Now →'),
             ),
           ],
         ),

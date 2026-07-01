@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/utils/error_handler.dart';
+import 'package:bite_balance/core/widgets/app_toast.dart';
 import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
 import 'package:bite_balance/features/auth/presentation/widgets/auth_text_field.dart';
 
@@ -98,11 +100,10 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage>
           }
         },
         error: (error, stackTrace) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text(error.toString()),
-              backgroundColor: AppTheme.error,
-            ),
+          AppToast.show(
+            context,
+            message: ErrorHandler.message(error),
+            backgroundColor: AppTheme.error,
           );
         },
       );
@@ -114,192 +115,204 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage>
         title: const Text('Setup Profile'),
       ),
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(24),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                // Header with gradient
-                _buildAnimatedChild(
-                  0,
-                  Container(
-                    padding: const EdgeInsets.all(28),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          AppTheme.primary,
-                          AppTheme.primaryDark,
-                        ],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                      ),
-                      borderRadius: BorderRadius.circular(24),
-                      boxShadow: [
-                        BoxShadow(
-                          color: AppTheme.primary.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
+        child: Center(
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 600),
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.all(24),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    // ── Header with gradient ──
+                    _buildAnimatedChild(
+                      0,
+                      Container(
+                        constraints: const BoxConstraints(maxHeight: 180),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 28,
+                          vertical: 20,
                         ),
-                      ],
-                    ),
-                    child: Column(
-                      children: [
-                        Container(
-                          width: 64,
-                          height: 64,
-                          decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
-                            borderRadius: BorderRadius.circular(18),
+                        decoration: BoxDecoration(
+                          gradient: const LinearGradient(
+                            colors: [
+                              AppTheme.primary,
+                              AppTheme.secondary,
+                              AppTheme.accent,
+                            ],
+                            begin: Alignment.topLeft,
+                            end: Alignment.bottomRight,
                           ),
-                          child: const Icon(
-                            Icons.person_add_rounded,
-                            size: 32,
-                            color: Colors.white,
-                          ),
+                          borderRadius: BorderRadius.circular(24),
+                          boxShadow: [
+                            BoxShadow(
+                              color: AppTheme.primary.withValues(alpha: 0.3),
+                              blurRadius: 20,
+                              offset: const Offset(0, 10),
+                            ),
+                          ],
                         ),
-                        const SizedBox(height: 16),
-                        Text(
-                          'Tell us about yourself',
-                          style: Theme.of(context)
-                              .textTheme
-                              .headlineMedium
-                              ?.copyWith(color: Colors.white),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'This helps us calculate your BMI',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
-                              ?.copyWith(color: Colors.white70),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Name Field
-                _buildAnimatedChild(
-                  1,
-                  AuthTextField(
-                    controller: _nameController,
-                    labelText: 'Full Name',
-                    hintText: 'Enter your full name',
-                    prefixIcon: Icons.person_outline,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your name';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Weight Field
-                _buildAnimatedChild(
-                  2,
-                  AuthTextField(
-                    controller: _weightController,
-                    labelText: 'Weight (kg)',
-                    hintText: 'Enter your weight',
-                    keyboardType: TextInputType.number,
-                    prefixIcon: Icons.monitor_weight_outlined,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your weight';
-                      }
-                      final weight = double.tryParse(value);
-                      if (weight == null || weight <= 0) {
-                        return 'Please enter a valid weight';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Height Field
-                _buildAnimatedChild(
-                  3,
-                  AuthTextField(
-                    controller: _heightController,
-                    labelText: 'Height (cm)',
-                    hintText: 'Enter your height',
-                    keyboardType: TextInputType.number,
-                    prefixIcon: Icons.height,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your height';
-                      }
-                      final height = double.tryParse(value);
-                      if (height == null || height <= 0) {
-                        return 'Please enter a valid height';
-                      }
-                      return null;
-                    },
-                  ),
-                ),
-                const SizedBox(height: 16),
-
-                // Goal Dropdown
-                _buildAnimatedChild(
-                  4,
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedGoal,
-                    decoration: const InputDecoration(
-                      labelText: 'Goal',
-                      prefixIcon: Icon(Icons.flag_outlined),
-                    ),
-                    items: const [
-                      DropdownMenuItem(
-                        value: 'lose',
-                        child: Text('Lose Weight'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'maintain',
-                        child: Text('Maintain Weight'),
-                      ),
-                      DropdownMenuItem(
-                        value: 'gain',
-                        child: Text('Gain Weight'),
-                      ),
-                    ],
-                    onChanged: (value) {
-                      if (value != null) {
-                        setState(() {
-                          _selectedGoal = value;
-                        });
-                      }
-                    },
-                  ),
-                ),
-                const SizedBox(height: 32),
-
-                // Save Button
-                _buildAnimatedChild(
-                  5,
-                  SizedBox(
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: profileState.isLoading ? null : _saveProfile,
-                      child: profileState.isLoading
-                          ? const SizedBox(
-                              height: 24,
-                              width: 24,
-                              child: CircularProgressIndicator(
-                                strokeWidth: 2.5,
+                        child: Column(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Container(
+                              width: 48,
+                              height: 48,
+                              decoration: BoxDecoration(
+                                color: Colors.white.withValues(alpha: 0.2),
+                                borderRadius: BorderRadius.circular(14),
+                              ),
+                              child: const Icon(
+                                Icons.person_add_rounded,
+                                size: 26,
                                 color: Colors.white,
                               ),
-                            )
-                          : const Text('Save Profile'),
+                            ),
+                            const SizedBox(height: 12),
+                            Text(
+                              'Tell us about yourself',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .headlineMedium
+                                  ?.copyWith(color: Colors.white),
+                            ),
+                            const SizedBox(height: 6),
+                            Text(
+                              'This helps us calculate your BMI',
+                              style: Theme.of(context)
+                                  .textTheme
+                                  .bodyMedium
+                                  ?.copyWith(color: Colors.white70),
+                            ),
+                          ],
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 32),
+
+                    // ── Name Field ──
+                    _buildAnimatedChild(
+                      1,
+                      AuthTextField(
+                        controller: _nameController,
+                        labelText: 'Full Name',
+                        hintText: 'Enter your full name',
+                        prefixIcon: Icons.person_outline,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your name';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ── Weight Field ──
+                    _buildAnimatedChild(
+                      2,
+                      AuthTextField(
+                        controller: _weightController,
+                        labelText: 'Weight (kg)',
+                        hintText: 'Enter your weight',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.monitor_weight_outlined,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your weight';
+                          }
+                          final weight = double.tryParse(value);
+                          if (weight == null || weight <= 0) {
+                            return 'Please enter a valid weight';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ── Height Field ──
+                    _buildAnimatedChild(
+                      3,
+                      AuthTextField(
+                        controller: _heightController,
+                        labelText: 'Height (cm)',
+                        hintText: 'Enter your height',
+                        keyboardType: TextInputType.number,
+                        prefixIcon: Icons.height,
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter your height';
+                          }
+                          final height = double.tryParse(value);
+                          if (height == null || height <= 0) {
+                            return 'Please enter a valid height';
+                          }
+                          return null;
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+
+                    // ── Goal Dropdown ──
+                    _buildAnimatedChild(
+                      4,
+                      DropdownButtonFormField<String>(
+                        initialValue: _selectedGoal,
+                        decoration: const InputDecoration(
+                          labelText: 'Goal',
+                          prefixIcon: Icon(Icons.flag_outlined),
+                        ),
+                        items: const [
+                          DropdownMenuItem(
+                            value: 'lose',
+                            child: Text('Lose Weight'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'maintain',
+                            child: Text('Maintain Weight'),
+                          ),
+                          DropdownMenuItem(
+                            value: 'gain',
+                            child: Text('Gain Weight'),
+                          ),
+                        ],
+                        onChanged: (value) {
+                          if (value != null) {
+                            setState(() {
+                              _selectedGoal = value;
+                            });
+                          }
+                        },
+                      ),
+                    ),
+                    const SizedBox(height: 32),
+
+                    // ── Save Button ──
+                    _buildAnimatedChild(
+                      5,
+                      SizedBox(
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed:
+                              profileState.isLoading ? null : _saveProfile,
+                          child: profileState.isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2.5,
+                                    color: Colors.white,
+                                  ),
+                                )
+                              : const Text('Save Profile'),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
-              ],
+              ),
             ),
           ),
         ),

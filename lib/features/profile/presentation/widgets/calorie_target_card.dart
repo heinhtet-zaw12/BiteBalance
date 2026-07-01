@@ -21,6 +21,7 @@ class CalorieTargetCard extends StatelessWidget {
           colors: [
             AppTheme.primary,
             AppTheme.primaryDark,
+            AppTheme.secondary,
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/core/utils/responsive.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/food_log/domain/entities/food_log.dart';
@@ -105,6 +106,11 @@ class _HomePageState extends ConsumerState<HomePage>
               title: const Text('Bite Balance'),
               actions: [
                 IconButton(
+                  icon: const Icon(Icons.edit_outlined),
+                  onPressed: () => context.go('/profile-setup'),
+                  tooltip: 'Edit Profile',
+                ),
+                IconButton(
                   icon: const Icon(Icons.logout_rounded),
                   onPressed: () async {
                     await ref.read(authProvider.notifier).signOut();
@@ -150,7 +156,7 @@ class _HomePageState extends ConsumerState<HomePage>
                 ),
                 const SizedBox(height: 8),
                 Text(
-                  error.toString(),
+                  ErrorHandler.message(error),
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
                 ),
@@ -216,13 +222,17 @@ class _HomePageState extends ConsumerState<HomePage>
             onRefresh: () async {
               ref.read(profileProvider.notifier).loadProfile();
             },
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: Responsive.pagePadding(context),
+            child: Center(
+              child: ConstrainedBox(
+                constraints: const BoxConstraints(maxWidth: 800),
+                child: SingleChildScrollView(
+                    primary: true,
+                    physics: const AlwaysScrollableScrollPhysics(),
+                    padding: Responsive.pagePadding(context),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  // Desktop: title row + logout
+                  // Desktop: title row + edit + logout
                   if (Responsive.isDesktop(context)) ...[
                     Row(
                       children: [
@@ -231,6 +241,11 @@ class _HomePageState extends ConsumerState<HomePage>
                           style: Theme.of(context).textTheme.headlineLarge,
                         ),
                         const Spacer(),
+                        IconButton(
+                          icon: const Icon(Icons.edit_outlined),
+                          onPressed: () => context.go('/profile-setup'),
+                          tooltip: 'Edit Profile',
+                        ),
                         IconButton(
                           icon: const Icon(Icons.logout_rounded),
                           onPressed: () async {
@@ -397,25 +412,13 @@ class _HomePageState extends ConsumerState<HomePage>
                       ),
                     ),
                   ],
-                  const SizedBox(height: 16),
-
-                  // Edit Profile Button
-                  _buildAnimatedChild(
-                    7,
-                    SizedBox(
-                      width: double.infinity,
-                      child: OutlinedButton.icon(
-                        onPressed: () => context.go('/profile-setup'),
-                        icon: const Icon(Icons.edit_outlined),
-                        label: const Text('Edit Profile'),
-                      ),
-                    ),
-                  ),
                   const SizedBox(height: 80), // Space for FAB
                 ],
               ),
             ),
-          );
+        ),
+      ),
+    );
         },
       ),
     );
@@ -488,7 +491,28 @@ class _HomePageState extends ConsumerState<HomePage>
           ),
         ),
       ),
-      error: (error, _) => const SizedBox.shrink(),
+      error: (error, _) => Card(
+        child: Padding(
+          padding: const EdgeInsets.all(24),
+          child: Center(
+            child: Column(
+              children: [
+                const Icon(
+                  Icons.error_outline_rounded,
+                  color: AppTheme.error,
+                  size: 32,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  ErrorHandler.message(error),
+                  textAlign: TextAlign.center,
+                  style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
       data: (recommendation) {
         if (recommendation == null) {
           return const SizedBox.shrink();
@@ -559,7 +583,31 @@ class _HomePageState extends ConsumerState<HomePage>
             ),
           ),
         ),
-        error: (error, _) => const SizedBox.shrink(),
+        error: (error, _) => _buildAnimatedChild(
+          index,
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(24),
+              child: Center(
+                child: Column(
+                  children: [
+                    const Icon(
+                      Icons.error_outline_rounded,
+                      color: AppTheme.error,
+                      size: 32,
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      ErrorHandler.message(error),
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.bodyMedium,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
         data: (recommendation) {
           if (recommendation == null) {
             return const SizedBox.shrink();

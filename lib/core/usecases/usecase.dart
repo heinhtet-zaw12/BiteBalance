@@ -1,5 +1,6 @@
 import 'package:fpdart/fpdart.dart';
-import 'package:bite_balance/core/errors/failures.dart';
+import '../errors/failures.dart';
+
 
 abstract class UseCase<T, Params> {
   Future<Either<Failure, T>> call(Params params);

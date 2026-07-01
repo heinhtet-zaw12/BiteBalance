@@ -11,6 +11,13 @@ final getDailySummaryProvider = Provider<GetDailySummary>((ref) {
 class DashboardNotifier extends AsyncNotifier<DailySummary?> {
   @override
   Future<DailySummary?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return null;
   }
 
@@ -26,7 +33,7 @@ class DashboardNotifier extends AsyncNotifier<DailySummary?> {
         GetDailySummaryParams(userId: user.id, date: targetDate),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (summary) => summary,
       );
     });

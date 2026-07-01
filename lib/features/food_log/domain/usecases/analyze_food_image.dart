@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:cross_file/cross_file.dart';
 import 'package:fpdart/fpdart.dart';
 import 'package:bite_balance/core/errors/failures.dart';
 import 'package:bite_balance/core/utils/app_logger.dart';
@@ -18,6 +18,8 @@ class AnalyzeFoodImage implements UseCase<FoodAnalysisResult, AnalyzeFoodImagePa
       return Right(result);
     } on QuotaExhaustedException catch (e) {
       return Left(ServerFailure(e.message));
+    } on ServerBusyException catch (e) {
+      return Left(ServerFailure(e.message));
     } catch (e, stackTrace) {
       AppLogger.error('Failed to analyzeFoodImage', e, stackTrace);
       return Left(ServerFailure('Unable to analyze food image. Please try again.'));
@@ -26,7 +28,7 @@ class AnalyzeFoodImage implements UseCase<FoodAnalysisResult, AnalyzeFoodImagePa
 }
 
 class AnalyzeFoodImageParams {
-  final File imageFile;
+  final XFile imageFile;
 
   const AnalyzeFoodImageParams({required this.imageFile});
 }

@@ -46,7 +46,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
         SignInParams(email: email, password: password),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (user) => user,
       );
     });
@@ -59,7 +59,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
         SignUpParams(email: email, password: password),
       );
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (user) => user,
       );
     });
@@ -70,7 +70,7 @@ class AuthNotifier extends AsyncNotifier<User?> {
     state = await AsyncValue.guard(() async {
       final result = await ref.read(signOutProvider)(const NoParams());
       return result.fold(
-        (failure) => throw Exception(failure.message),
+        (failure) => throw failure,
         (_) => null,
       );
     });

@@ -40,6 +40,13 @@ final calculateBmiProvider = Provider<CalculateBmi>((ref) {
 class ProfileNotifier extends AsyncNotifier<Profile?> {
   @override
   Future<Profile?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     final user = ref.read(authRepositoryProvider).currentUser;
     if (user == null) return null;
 
@@ -113,6 +120,13 @@ final getCalorieRecommendationProvider = Provider<GetCalorieRecommendation>((ref
 class CalorieRecommendationNotifier extends AsyncNotifier<CalorieRecommendation?> {
   @override
   Future<CalorieRecommendation?> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return null;
   }
 

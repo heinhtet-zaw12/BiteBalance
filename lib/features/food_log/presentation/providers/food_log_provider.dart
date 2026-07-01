@@ -1,9 +1,10 @@
-import 'dart:io';
+import 'package:cross_file/cross_file.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
+import 'package:bite_balance/features/food_log/domain/exceptions/invalid_food_exception.dart';
 import 'package:bite_balance/features/food_log/data/datasources/food_log_remote_datasource.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_client.dart';
 import 'package:bite_balance/features/food_log/data/datasources/gemini_datasource.dart';
@@ -91,7 +92,16 @@ class FoodLogState {
 // Food log notifier
 class FoodLogNotifier extends Notifier<FoodLogState> {
   @override
-  FoodLogState build() => const FoodLogState();
+  FoodLogState build() {
+    // Reset self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        state = const FoodLogState();
+      }
+    });
+
+    return const FoodLogState();
+  }
 
   Future<void> analyzeFood(String foodDescription) async {
     state = state.copyWith(isAnalyzing: true, error: null, analysis: null);
@@ -105,14 +115,23 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
         isAnalyzing: false,
         error: ErrorHandler.message(failure),
       ),
-      (analysis) => state = state.copyWith(
-        isAnalyzing: false,
-        analysis: analysis,
-      ),
+      (analysis) {
+        if (!analysis.isFood) {
+          state = state.copyWith(
+            isAnalyzing: false,
+            error: const InvalidFoodException().message,
+          );
+        } else {
+          state = state.copyWith(
+            isAnalyzing: false,
+            analysis: analysis,
+          );
+        }
+      },
     );
   }
 
-  Future<void> analyzeFoodImage(File imageFile) async {
+  Future<void> analyzeFoodImage(XFile imageFile) async {
     state = state.copyWith(isAnalyzing: true, error: null, analysis: null);
 
     final result = await ref.read(analyzeFoodImageProvider)(
@@ -124,10 +143,19 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
         isAnalyzing: false,
         error: ErrorHandler.message(failure),
       ),
-      (analysis) => state = state.copyWith(
-        isAnalyzing: false,
-        analysis: analysis,
-      ),
+      (analysis) {
+        if (!analysis.isFood) {
+          state = state.copyWith(
+            isAnalyzing: false,
+            error: const InvalidFoodException().message,
+          );
+        } else {
+          state = state.copyWith(
+            isAnalyzing: false,
+            analysis: analysis,
+          );
+        }
+      },
     );
   }
 
@@ -164,6 +192,8 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
       },
       (_) {
         state = const FoodLogState();
+        // Refresh daily logs so the home page updates immediately
+        ref.read(dailyLogsProvider.notifier).loadLogs(DateTime.now());
         return true;
       },
     );
@@ -181,6 +211,13 @@ final foodLogProvider =
 class DailyLogsNotifier extends AsyncNotifier<List<FoodLog>> {
   @override
   Future<List<FoodLog>> build() async {
+    // Invalidate self when user changes (logout or different user login)
+    ref.listen(authProvider, (previous, next) {
+      if (previous?.value?.id != next.value?.id) {
+        ref.invalidateSelf();
+      }
+    });
+
     return [];
   }
 

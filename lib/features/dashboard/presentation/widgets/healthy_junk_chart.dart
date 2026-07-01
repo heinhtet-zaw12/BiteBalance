@@ -119,8 +119,8 @@ class HealthyJunkChart extends StatelessWidget {
                       color: AppTheme.success,
                       radius: 55,
                       showTitle: false,
-                      borderSide: const BorderSide(
-                        color: Colors.white,
+                      borderSide: BorderSide(
+                        color: AppTheme.background,
                         width: 2,
                       ),
                     ),
@@ -129,8 +129,8 @@ class HealthyJunkChart extends StatelessWidget {
                       color: AppTheme.error,
                       radius: 55,
                       showTitle: false,
-                      borderSide: const BorderSide(
-                        color: Colors.white,
+                      borderSide: BorderSide(
+                        color: AppTheme.background,
                         width: 2,
                       ),
                     ),

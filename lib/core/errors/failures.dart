@@ -29,3 +29,13 @@ class QuotaExhaustedException implements Exception {
   @override
   String toString() => message;
 }
+
+class ServerBusyException implements Exception {
+  final String message;
+  const ServerBusyException([
+    this.message = 'Server is busy. Please try again.',
+  ]);
+
+  @override
+  String toString() => message;
+}
