@@ -11,6 +11,7 @@ import 'package:bite_balance/features/profile/presentation/providers/profile_pro
 import 'package:bite_balance/features/profile/presentation/widgets/bmi_card.dart';
 import 'package:bite_balance/features/profile/presentation/widgets/calorie_target_card.dart';
 import 'package:bite_balance/features/profile/presentation/widgets/remaining_calories_card.dart';
+import 'package:bite_balance/core/widgets/shimmer_loading.dart';
 
 class HomePage extends ConsumerStatefulWidget {
   const HomePage({super.key});
@@ -127,9 +128,7 @@ class _HomePageState extends ConsumerState<HomePage>
         label: const Text('Log Food'),
       ),
       body: profileState.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const HomeShimmer(),
         error: (error, stackTrace) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
@@ -463,34 +462,7 @@ class _HomePageState extends ConsumerState<HomePage>
     required AsyncValue<List<FoodLog>> dailyLogsState,
   }) {
     return calorieRecommendationState.when(
-      loading: () => Card(
-        child: Padding(
-          padding: const EdgeInsets.all(24),
-          child: Center(
-            child: Column(
-              children: [
-                Container(
-                  width: 48,
-                  height: 48,
-                  decoration: BoxDecoration(
-                    color: AppTheme.primary.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: const CircularProgressIndicator(
-                    strokeWidth: 2.5,
-                    color: AppTheme.primary,
-                  ),
-                ),
-                const SizedBox(height: 16),
-                Text(
-                  'Calculating your calorie target...',
-                  style: Theme.of(context).textTheme.bodyMedium,
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
+      loading: () => const CalorieCardShimmer(),
       error: (error, _) => Card(
         child: Padding(
           padding: const EdgeInsets.all(24),
@@ -554,34 +526,7 @@ class _HomePageState extends ConsumerState<HomePage>
       calorieRecommendationState.when(
         loading: () => _buildAnimatedChild(
           index,
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(24),
-              child: Center(
-                child: Column(
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: AppTheme.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(14),
-                      ),
-                      child: const CircularProgressIndicator(
-                        strokeWidth: 2.5,
-                        color: AppTheme.primary,
-                      ),
-                    ),
-                    const SizedBox(height: 16),
-                    Text(
-                      'Calculating your calorie target...',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
+          const CalorieCardShimmer(),
         ),
         error: (error, _) => _buildAnimatedChild(
           index,

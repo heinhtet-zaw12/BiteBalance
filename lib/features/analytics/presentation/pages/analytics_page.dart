@@ -11,6 +11,7 @@ import 'package:bite_balance/features/analytics/presentation/widgets/healthy_jun
 import 'package:bite_balance/features/analytics/presentation/widgets/junk_food_bar_chart.dart';
 import 'package:bite_balance/features/profile/domain/entities/profile.dart';
 import 'package:bite_balance/features/profile/presentation/providers/profile_provider.dart';
+import 'package:bite_balance/core/widgets/shimmer_loading.dart';
 
 class AnalyticsPage extends ConsumerStatefulWidget {
   const AnalyticsPage({super.key});
@@ -211,7 +212,7 @@ class _DailyTab extends ConsumerWidget {
     final statsState = ref.watch(dailyStatsProvider);
 
     return statsState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const AnalyticsShimmer(),
       error: (error, _) => _ErrorWidget(
         message: ErrorHandler.message(error),
         onRetry: () => ref
@@ -250,7 +251,7 @@ class _WeeklyTab extends ConsumerWidget {
     final statsState = ref.watch(weeklyStatsProvider);
 
     return statsState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const AnalyticsShimmer(),
       error: (error, _) => _ErrorWidget(
         message: ErrorHandler.message(error),
         onRetry: () {
@@ -300,7 +301,7 @@ class _MonthlyTab extends ConsumerWidget {
     final statsState = ref.watch(monthlyStatsProvider);
 
     return statsState.when(
-      loading: () => const Center(child: CircularProgressIndicator()),
+      loading: () => const AnalyticsShimmer(),
       error: (error, _) => _ErrorWidget(
         message: ErrorHandler.message(error),
         onRetry: () {

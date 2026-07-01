@@ -8,6 +8,7 @@ import 'package:bite_balance/features/dashboard/presentation/providers/dashboard
 import 'package:bite_balance/features/dashboard/presentation/widgets/calorie_summary_card.dart';
 import 'package:bite_balance/features/dashboard/presentation/widgets/healthy_junk_chart.dart';
 import 'package:bite_balance/features/dashboard/presentation/widgets/food_log_tile.dart';
+import 'package:bite_balance/core/widgets/shimmer_loading.dart';
 
 class DashboardPage extends ConsumerStatefulWidget {
   const DashboardPage({super.key});
@@ -103,9 +104,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         label: const Text('Log Food'),
       ),
       body: summaryState.when(
-        loading: () => const Center(
-          child: CircularProgressIndicator(),
-        ),
+        loading: () => const DashboardShimmer(),
         error: (error, _) => Center(
           child: Padding(
             padding: const EdgeInsets.all(24),
