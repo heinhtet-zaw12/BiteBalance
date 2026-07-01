@@ -221,14 +221,14 @@ class _HomePageState extends ConsumerState<HomePage>
             onRefresh: () async {
               ref.read(profileProvider.notifier).loadProfile();
             },
-            child: Center(
+            child: SingleChildScrollView(
+                primary: true,
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: Responsive.pagePadding(context),
+              child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
-                child: SingleChildScrollView(
-                    primary: true,
-                    physics: const AlwaysScrollableScrollPhysics(),
-                    padding: Responsive.pagePadding(context),
-              child: Column(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Desktop: title row + edit + logout
@@ -414,10 +414,10 @@ class _HomePageState extends ConsumerState<HomePage>
                   const SizedBox(height: 80), // Space for FAB
                 ],
               ),
+              ),
             ),
-        ),
-      ),
-    );
+          ),
+      );
         },
       ),
     );

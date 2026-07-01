@@ -163,13 +163,13 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
             onRefresh: () async {
               ref.read(dashboardProvider.notifier).loadSummary();
             },
-            child: Center(
+            child: SingleChildScrollView(
+                physics: const AlwaysScrollableScrollPhysics(),
+                padding: Responsive.pagePadding(context),
+              child: Center(
               child: ConstrainedBox(
                 constraints: const BoxConstraints(maxWidth: 800),
-                child: SingleChildScrollView(
-                  physics: const AlwaysScrollableScrollPhysics(),
-                  padding: Responsive.pagePadding(context),
-              child: Column(
+                child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   // Desktop: title row (since no AppBar)
@@ -322,8 +322,8 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
                   const SizedBox(height: 80),
                 ],
               ),
+              ),
             ),
-          ),
           ),
           );
         },
