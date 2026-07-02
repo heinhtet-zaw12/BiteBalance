@@ -17,6 +17,7 @@ jobs:
 
       - run: flutter pub get
       - run: flutter build web --release
+      - run: cp vercel.json build/web/
 
       - uses: amondnet/vercel-action@v25
         with:
