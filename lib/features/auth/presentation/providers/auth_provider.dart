@@ -86,18 +86,36 @@ final authProvider = AsyncNotifierProvider<AuthNotifier, User?>(
 /// GoRouter uses this to re-evaluate its redirect function.
 final authRefreshProvider = Provider<AuthRefreshNotifier>((ref) {
   final notifier = AuthRefreshNotifier();
+
+  // 1. Handle already-restored session (Supabase.initialize runs before
+  //    runApp, so currentSession is set before this provider is created,
+  //    but onAuthStateChange only emits *future* events — the restore
+  //    event already fired and was missed).
+  if (Supabase.instance.client.auth.currentSession != null) {
+    // Schedule a microtask so the router is fully built before the
+    // notification triggers a redirect re-evaluation.
+    Future.microtask(() => notifier.notifyListeners());
+  }
+
+  // 2. React to future auth events (login, logout, token refresh).
   final sub = Supabase.instance.client.auth.onAuthStateChange.listen((event) {
-    // Invalidate auth state on sign-out or token refresh failure
     if (event.event == AuthChangeEvent.signedOut) {
-      // AuthNotifier.signOut() already cleared the state.
-      // Just notify GoRouter so it re-evaluates the redirect.
       notifier.notifyListeners();
     } else if (event.event == AuthChangeEvent.signedIn ||
         event.event == AuthChangeEvent.tokenRefreshed) {
-      // Refresh the auth state so the router re-evaluates
       notifier.notifyListeners();
     }
   });
+
+  // 3. When authProvider finishes loading (resolves persisted session),
+  //    notify GoRouter so the redirect uses the real auth state instead
+  //    of AsyncLoading (which returns null → would redirect to /login).
+  ref.listen<AsyncValue<User?>>(authProvider, (previous, next) {
+    if (previous?.isLoading == true && !next.isLoading) {
+      notifier.notifyListeners();
+    }
+  });
+
   ref.onDispose(() => sub.cancel());
   return notifier;
 });
