@@ -1,16 +1,17 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:bite_balance/core/constants/app_theme.dart';
+import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 
-class SplashPage extends StatefulWidget {
+class SplashPage extends ConsumerStatefulWidget {
   const SplashPage({super.key});
 
   @override
-  State<SplashPage> createState() => _SplashPageState();
+  ConsumerState<SplashPage> createState() => _SplashPageState();
 }
 
-class _SplashPageState extends State<SplashPage>
+class _SplashPageState extends ConsumerState<SplashPage>
     with TickerProviderStateMixin {
   late final AnimationController _logoController;
   late final AnimationController _textController;
@@ -78,13 +79,29 @@ class _SplashPageState extends State<SplashPage>
   }
 
   Future<void> _checkAuth() async {
+    // Wait for splash animation to play
     await Future.delayed(const Duration(seconds: 2));
 
     if (!mounted) return;
 
-    final session = Supabase.instance.client.auth.currentSession;
+    // Wait for the auth provider to finish loading (resolving persisted session)
+    final authState = ref.read(authProvider);
+    if (authState.isLoading) {
+      // Listen for the auth state to settle, then navigate
+      ref.listenManual(authProvider, (previous, next) {
+        if (!next.isLoading && mounted) {
+          if (next.valueOrNull != null) {
+            context.go('/home');
+          } else {
+            context.go('/login');
+          }
+        }
+      });
+      return;
+    }
 
-    if (session != null) {
+    // Auth state already resolved — navigate immediately
+    if (authState.valueOrNull != null) {
       context.go('/home');
     } else {
       context.go('/login');
