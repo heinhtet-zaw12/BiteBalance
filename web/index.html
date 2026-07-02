@@ -27,7 +27,7 @@
   <link rel="apple-touch-icon" href="icons/Icon-192.png">
 
   <!-- Favicon -->
-  <link rel="icon" type="image/jpeg" href="assets/images/bite_balance_favicon.jpg"/>
+  <link rel="icon" type="image/jpeg" href="favicon.jpg"/>
 
   <title>bite_balance</title>
   <link rel="manifest" href="manifest.json">
@@ -36,9 +36,7 @@
   <!-- Loading screen — removed on flutter-first-frame -->
   <div id="loading-screen">
     <div class="loading-content">
-      <div class="logo-ring">
-        <img src="assets/images/bite_balance_favicon.jpg" alt="Bite Balance" class="logo-img" />
-      </div>
+      <div id="lottie-animation"></div>
       <p class="loading-text">Bite Balance</p>
     </div>
   </div>
@@ -64,24 +62,9 @@
       align-items: center;
       gap: 24px;
     }
-    .logo-ring {
-      width: 120px;
-      height: 120px;
-      border-radius: 50%;
-      padding: 4px;
-      background: conic-gradient(from 0deg, #9B7BFF, #FF6B9D, #34D399, #9B7BFF);
-      animation: spin 3s linear infinite;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
-    .logo-img {
-      width: 100%;
-      height: 100%;
-      border-radius: 50%;
-      object-fit: cover;
-      border: 4px solid #0D0B14;
-      animation: pulse 2s ease-in-out infinite;
+    #lottie-animation {
+      width: 160px;
+      height: 160px;
     }
     .loading-text {
       font-family: system-ui, -apple-system, sans-serif;
@@ -91,30 +74,30 @@
       color: #A09BB5;
       animation: textFade 2s ease-in-out infinite;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    @keyframes pulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(155, 123, 255, 0.3); }
-      50% { box-shadow: 0 0 40px rgba(155, 123, 255, 0.6); }
-    }
     @keyframes textFade {
       0%, 100% { opacity: 0.5; }
       50% { opacity: 1; }
     }
   </style>
 
-  <!-- Required: Corbado WebAuthn JS bridge for passkeys_web (used by supabase_flutter on web) -->
-  <script
-    src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"
-    type="application/javascript"
-  ></script>
+  <!-- Lottie-web for loading animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
 
   <script>
+    // Initialize Lottie animation (same as Flutter splash: assets/animations/splash.json)
+    var lottieAnim = lottie.loadAnimation({
+      container: document.getElementById('lottie-animation'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'assets/animations/splash.json'
+    });
+
     // Fade out and remove loading screen when Flutter renders its first frame
     function removeLoadingScreen() {
       var el = document.getElementById('loading-screen');
       if (!el) return;
+      lottieAnim.stop();
       el.classList.add('fade-out');
       el.addEventListener('transitionend', function() { el.remove(); });
       // Safety fallback: remove after 500ms even if transitionend doesn't fire
@@ -127,6 +110,12 @@
     // Fallback: if the event never fires (older engine), remove after 10s
     setTimeout(function() { removeLoadingScreen(); }, 10000);
   </script>
+
+  <!-- Required: Corbado WebAuthn JS bridge for passkeys_web (used by supabase_flutter on web) -->
+  <script
+    src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"
+    type="application/javascript"
+  ></script>
 
   <script src="flutter_bootstrap.js" async></script>
 </body>
