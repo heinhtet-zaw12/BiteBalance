@@ -220,10 +220,14 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
                       color: AppTheme.primary.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(18),
                     ),
-                    child: const Icon(
-                      Icons.person_add_rounded,
-                      size: 32,
-                      color: AppTheme.primary,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/images/bite_balance_favicon.jpg',
+                        width: 32,
+                        height: 32,
+                        fit: BoxFit.cover,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 20),

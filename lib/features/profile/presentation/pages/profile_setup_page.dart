@@ -112,6 +112,10 @@ class _ProfileSetupPageState extends ConsumerState<ProfileSetupPage>
     return Scaffold(
       backgroundColor: AppTheme.background,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back_ios_new_rounded),
+          onPressed: () => context.go('/home'),
+        ),
         title: const Text('Setup Profile'),
       ),
       body: SafeArea(
