@@ -323,14 +323,14 @@ class _MonthlyTab extends ConsumerWidget {
           _StatsInfoItem(
             label: 'Days Tracked',
             value: '${stats.totalDaysTracked}',
-            icon: Icons.calendar_today_rounded,
+            icon: const Icon(Icons.calendar_today_rounded, color: AppTheme.primary, size: 20),
           ),
           if (isProfileComplete)
             _StatsInfoItem(
               label: 'Avg Daily Calories',
               value:
                   '${stats.averageDailyCalories.toStringAsFixed(0)} kcal',
-              icon: Icons.trending_up_rounded,
+              icon: const Icon(Icons.trending_up_rounded, color: AppTheme.primary, size: 20),
             ),
         ];
 
@@ -453,13 +453,13 @@ class _StatsContent extends StatelessWidget {
               _StatsInfoItem(
                 label: 'Total Items',
                 value: '${stats.totalItems}',
-                icon: Icons.restaurant_rounded,
+                icon: Image.asset('assets/images/bite_balance_logo.png', width: 20, height: 20),
               ),
               _StatsInfoItem(
                 label: 'Healthy',
                 value:
                     '${(stats.healthyRatio * 100).toStringAsFixed(0)}%',
-                icon: Icons.favorite_rounded,
+                icon: const Icon(Icons.favorite_rounded, color: AppTheme.primary, size: 20),
               ),
             ],
           ),
@@ -634,11 +634,7 @@ class _StatsInfoCard extends StatelessWidget {
                                   color: AppTheme.primary.withValues(alpha: 0.1),
                                   borderRadius: BorderRadius.circular(12),
                                 ),
-                                child: Icon(
-                                  item.icon,
-                                  color: AppTheme.primary,
-                                  size: 20,
-                                ),
+                                child: Center(child: item.icon),
                               ),
                               const SizedBox(width: 14),
                               Expanded(
@@ -672,7 +668,7 @@ class _StatsInfoCard extends StatelessWidget {
 class _StatsInfoItem {
   final String label;
   final String value;
-  final IconData icon;
+  final Widget icon;
 
   const _StatsInfoItem({
     required this.label,

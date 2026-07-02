@@ -105,11 +105,7 @@ class CalorieSummaryCard extends StatelessWidget {
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  const Icon(
-                    Icons.restaurant_rounded,
-                    size: 14,
-                    color: AppTheme.primary,
-                  ),
+                  Image.asset('assets/images/bite_balance_logo.png', width: 14, height: 14),
                   const SizedBox(width: 8),
                   Text(
                     '$totalItems items logged',

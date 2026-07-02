@@ -119,11 +119,7 @@ class CalorieTargetCard extends StatelessWidget {
                       color: Colors.white.withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
-                    child: const Icon(
-                      Icons.restaurant_rounded,
-                      color: Colors.white,
-                      size: 14,
-                    ),
+                    child: Image.asset('assets/images/bite_balance_logo.png', width: 14, height: 14),
                   ),
                   const SizedBox(width: 10),
                   Text(

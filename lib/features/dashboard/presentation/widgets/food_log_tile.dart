@@ -25,11 +25,9 @@ class FoodLogTile extends StatelessWidget {
                 color: statusColor.withValues(alpha: 0.1),
                 borderRadius: BorderRadius.circular(14),
               ),
-              child: Icon(
-                isJunk ? Icons.fastfood_rounded : Icons.restaurant_rounded,
-                color: statusColor,
-                size: 24,
-              ),
+              child: isJunk
+                  ? Icon(Icons.fastfood_rounded, color: statusColor, size: 24)
+                  : Image.asset('assets/images/bite_balance_logo.png', width: 24, height: 24),
             ),
             const SizedBox(width: 14),
 
@@ -59,10 +57,10 @@ class FoodLogTile extends StatelessWidget {
                         child: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
-                            Icon(
-                              _getMealIcon(foodLog.mealType),
-                              size: 12,
-                              color: AppTheme.textTertiary,
+                            SizedBox(
+                              width: 12,
+                              height: 12,
+                              child: _getMealIcon(foodLog.mealType),
                             ),
                             const SizedBox(width: 4),
                             Text(
@@ -160,18 +158,18 @@ class FoodLogTile extends StatelessWidget {
     }
   }
 
-  IconData _getMealIcon(String mealType) {
+  Widget _getMealIcon(String mealType) {
     switch (mealType) {
       case 'breakfast':
-        return Icons.free_breakfast_rounded;
+        return const Icon(Icons.free_breakfast_rounded, size: 12, color: AppTheme.textTertiary);
       case 'lunch':
-        return Icons.lunch_dining_rounded;
+        return const Icon(Icons.lunch_dining_rounded, size: 12, color: AppTheme.textTertiary);
       case 'dinner':
-        return Icons.dinner_dining_rounded;
+        return const Icon(Icons.dinner_dining_rounded, size: 12, color: AppTheme.textTertiary);
       case 'snack':
-        return Icons.cookie_rounded;
+        return const Icon(Icons.cookie_rounded, size: 12, color: AppTheme.textTertiary);
       default:
-        return Icons.restaurant_rounded;
+        return Image.asset('assets/images/bite_balance_logo.png', width: 12, height: 12);
     }
   }
 }

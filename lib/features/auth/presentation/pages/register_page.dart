@@ -483,11 +483,7 @@ class _BrandedPanelState extends State<_BrandedPanel>
                           width: 1.5,
                         ),
                       ),
-                      child: const Icon(
-                        Icons.restaurant_rounded,
-                        size: 48,
-                        color: Colors.white,
-                      ),
+                      child: Image.asset('assets/images/bite_balance_logo.png', width: 48, height: 48),
                     ),
                   ),
                   const SizedBox(height: 32),

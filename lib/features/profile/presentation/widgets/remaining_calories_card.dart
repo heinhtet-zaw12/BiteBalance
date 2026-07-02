@@ -141,12 +141,12 @@ class RemainingCaloriesCard extends StatelessWidget {
               children: [
                 _buildLabel(
                   context,
-                  icon: Icons.restaurant_rounded,
+                  icon: Image.asset('assets/images/bite_balance_logo.png', width: 14, height: 14),
                   label: '${caloriesConsumed.toStringAsFixed(0)} kcal eaten',
                 ),
                 _buildLabel(
                   context,
-                  icon: Icons.flag_rounded,
+                  icon: const Icon(Icons.flag_rounded, size: 14, color: AppTheme.textTertiary),
                   label: '${calorieTarget.toStringAsFixed(0)} kcal target',
                 ),
               ],
@@ -159,17 +159,13 @@ class RemainingCaloriesCard extends StatelessWidget {
 
   Widget _buildLabel(
     BuildContext context, {
-    required IconData icon,
+    required Widget icon,
     required String label,
   }) {
     return Row(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Icon(
-          icon,
-          size: 14,
-          color: AppTheme.textTertiary,
-        ),
+        icon,
         const SizedBox(width: 6),
         Text(
           label,

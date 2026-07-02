@@ -368,7 +368,7 @@ class _HomePageState extends ConsumerState<HomePage>
                         children: [
                           Expanded(
                             child: _ActionCard(
-                              icon: Icons.restaurant_rounded,
+                              icon: Image.asset('assets/images/bite_balance_logo.png', width: 28, height: 28),
                               iconColor: AppTheme.primary,
                               title: 'Log Your Food',
                               subtitle: 'Let AI analyze your meals',
@@ -378,7 +378,7 @@ class _HomePageState extends ConsumerState<HomePage>
                           const SizedBox(width: 16),
                           Expanded(
                             child: _ActionCard(
-                              icon: Icons.dashboard_rounded,
+                              icon: const Icon(Icons.dashboard_rounded, color: AppTheme.secondary),
                               iconColor: AppTheme.secondary,
                               title: 'View Dashboard',
                               subtitle: 'Track your daily calories',
@@ -392,7 +392,7 @@ class _HomePageState extends ConsumerState<HomePage>
                     _buildAnimatedChild(
                       5,
                       _ActionCard(
-                        icon: Icons.restaurant_rounded,
+                        icon: Image.asset('assets/images/bite_balance_logo.png', width: 28, height: 28),
                         iconColor: AppTheme.primary,
                         title: 'Log Your Food',
                         subtitle: 'Let AI analyze your meals',
@@ -403,7 +403,7 @@ class _HomePageState extends ConsumerState<HomePage>
                     _buildAnimatedChild(
                       6,
                       _ActionCard(
-                        icon: Icons.dashboard_rounded,
+                        icon: const Icon(Icons.dashboard_rounded, color: AppTheme.secondary),
                         iconColor: AppTheme.secondary,
                         title: 'View Dashboard',
                         subtitle: 'Track your daily calories',
@@ -606,7 +606,7 @@ class _HomePageState extends ConsumerState<HomePage>
 }
 
 class _ActionCard extends StatefulWidget {
-  final IconData icon;
+  final Widget icon;
   final Color iconColor;
   final String title;
   final String subtitle;
@@ -670,10 +670,7 @@ class _ActionCardState extends State<_ActionCard>
                     color: widget.iconColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(14),
                   ),
-                  child: Icon(
-                    widget.icon,
-                    color: widget.iconColor,
-                  ),
+                  child: Center(child: widget.icon),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

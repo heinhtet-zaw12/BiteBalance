@@ -92,11 +92,7 @@ class _MainScaffoldState extends State<MainScaffold> {
                           ),
                           borderRadius: BorderRadius.circular(12),
                         ),
-                        child: const Icon(
-                          Icons.restaurant_rounded,
-                          size: 22,
-                          color: Colors.white,
-                        ),
+                        child: Image.asset('assets/images/bite_balance_logo.png', width: 22, height: 22),
                       ),
                       const SizedBox(width: 12),
                       Text(
