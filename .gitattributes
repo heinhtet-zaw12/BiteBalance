@@ -1,0 +1,6 @@
+# Mark Flutter web build output as generated (excluded from GitHub language stats)
+*.js linguist-generated=true
+*.mjs linguist-generated=true
+*.wasm linguist-generated=true
+*.map linguist-generated=true
+canvaskit/** linguist-generated=true
