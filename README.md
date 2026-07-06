@@ -71,9 +71,9 @@ lib/
 <details>
 <summary>👤 Login , Home and Food analyze (click to expand)</summary>
 
-| Login                                  | Home | Food analyze |
-|----------------------------------------|------|-------------|
-| ![Login](assets/screenshots/Login.png) | ![Home](assets/screenshots/home.png) |![Food analyze](assets/screenshots/food_analyze.png)
+| Login                                  | Daily Analytics                                            | Log food                                             |
+|----------------------------------------|------------------------------------------------------------|------------------------------------------------------|
+| ![Login](assets/screenshots/Login.png) | ![Daily Analytics](assets/screenshots/daily_analytics.png) | ![Log food](assets/screenshots/log_food.png) 
 
 </details>
 

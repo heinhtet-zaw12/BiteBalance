@@ -92,6 +92,7 @@ class _AnalyticsPageState extends ConsumerState<AnalyticsPage>
       appBar: Responsive.isDesktop(context)
           ? null
           : AppBar(
+        backgroundColor:  AppTheme.background,
               title: const Text('Analytics'),
               bottom: TabBar(
                 controller: _tabController,

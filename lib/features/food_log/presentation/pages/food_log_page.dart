@@ -86,6 +86,7 @@ class _FoodLogPageState extends ConsumerState<FoodLogPage> {
       backgroundColor: AppTheme.background,
       appBar: AppBar(
         title: const Text('Log Food'),
+        backgroundColor:  AppTheme.background,
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(24),
