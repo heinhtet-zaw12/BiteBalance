@@ -65,46 +65,19 @@ lib/
 
 ## 📸 Screenshots
 
-### Auth
-| Login | Sign Up |
-|-------|---------|
-| ![Login](assets/screenshots/login.png) | ![Sign Up](assets/screenshots/sign_up.png) |
+
+
 
 <details>
-<summary>👤 Profile & Home (click to expand)</summary>
+<summary>👤 Login , Home and Food analyze (click to expand)</summary>
 
-| Profile Setup | Home |
-|---------------|------|
-| ![Profile Setup](assets/screenshots/profile_setUp.png) | ![Home](assets/screenshots/home.png) |
+| Login                                  | Home | Food analyze |
+|----------------------------------------|------|-------------|
+| ![Login](assets/screenshots/Login.png) | ![Home](assets/screenshots/home.png) |![Food analyze](assets/screenshots/food_analyze.png)
 
 </details>
 
-<details>
-<summary>🍽️ Food Logging (click to expand)</summary>
 
-| Log Food | Log Food 2 | Log Food 3 |
-|----------|------------|------------|
-| ![Log Food](assets/screenshots/food_log.png) | ![Log Food 2](assets/screenshots/food_log2.png) | ![Log Food 3](assets/screenshots/food_log3.png) |
-
-</details>
-
-<details>
-<summary>📊 Dashboard (click to expand)</summary>
-
-| Dashboard | Dashboard 2 |
-|-----------|-------------|
-| ![Dashboard](assets/screenshots/dashboard.png) | ![Dashboard 2](assets/screenshots/dashboard2.png) |
-
-</details>
-
-<details>
-<summary>📅 Analytics (click to expand)</summary>
-
-| Daily | Weekly | Monthly |
-|-------|--------|---------|
-| ![Daily](assets/screenshots/daily_analytics.png) | ![Weekly](assets/screenshots/weekly_analytics.png) | ![Monthly](assets/screenshots/monthly_analytics.png) |
-
-</details>
 
 ## 🚀 Getting Started
 
