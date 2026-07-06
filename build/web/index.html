@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <!--
+    If you are serving your web app in a path other than the root, change the
+    href value below to reflect the base path you are serving from.
+
+    The path provided below has to start and end with a slash "/" in order for
+    it to work correctly.
+
+    For more details:
+    * https://developer.mozilla.org/en-US/docs/Web/HTML/Element/base
+
+    This is a placeholder for base href that will be replaced by the value of
+    the `--base-href` argument provided to `flutter build`.
+  -->
+  <base href="/">
+
+  <meta charset="UTF-8">
+  <meta content="IE=Edge" http-equiv="X-UA-Compatible">
+  <meta name="description" content="AI-powered calorie tracking app that analyzes meals from photos or text, classifies healthy vs junk food, tracks daily and monthly calorie intake, and provides BMI-based health insights with smart notifications.">
+
+  <!-- iOS meta tags & icons -->
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta name="apple-mobile-web-app-title" content="bite_balance">
+  <link rel="apple-touch-icon" href="icons/Icon-192.png">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/jpeg" href="favicon.jpg"/>
+
+  <title>bite_balance</title>
+  <link rel="manifest" href="manifest.json">
+</head>
+<body>
+  <!-- Loading screen — removed on flutter-first-frame -->
+  <div id="loading-screen">
+    <div class="loading-content">
+      <div id="lottie-animation"></div>
+      <p class="loading-text">Bite Balance</p>
+    </div>
+  </div>
+
+  <style>
+    #loading-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: #0D0B14;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.4s ease-out;
+    }
+    #loading-screen.fade-out {
+      opacity: 0;
+      pointer-events: none;
+    }
+    .loading-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 24px;
+    }
+    #lottie-animation {
+      width: 160px;
+      height: 160px;
+    }
+    .loading-text {
+      font-family: system-ui, -apple-system, sans-serif;
+      font-size: 18px;
+      font-weight: 600;
+      letter-spacing: 2px;
+      color: #A09BB5;
+      animation: textFade 2s ease-in-out infinite;
+    }
+    @keyframes textFade {
+      0%, 100% { opacity: 0.5; }
+      50% { opacity: 1; }
+    }
+  </style>
+
+  <!-- Lottie-web for loading animation -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.12.2/lottie.min.js"></script>
+
+  <script>
+    // Initialize Lottie animation (same as Flutter splash: assets/animations/splash.json)
+    var lottieAnim = lottie.loadAnimation({
+      container: document.getElementById('lottie-animation'),
+      renderer: 'svg',
+      loop: true,
+      autoplay: true,
+      path: 'assets/animations/splash.json'
+    });
+
+    // Fade out and remove loading screen when Flutter renders its first frame
+    function removeLoadingScreen() {
+      var el = document.getElementById('loading-screen');
+      if (!el) return;
+      lottieAnim.stop();
+      el.classList.add('fade-out');
+      el.addEventListener('transitionend', function() { el.remove(); });
+      // Safety fallback: remove after 500ms even if transitionend doesn't fire
+      setTimeout(function() { if (el.parentNode) el.remove(); }, 500);
+    }
+
+    // Listen for Flutter's first frame event
+    window.addEventListener('flutter-first-frame', removeLoadingScreen);
+
+    // Fallback: if the event never fires (older engine), remove after 10s
+    setTimeout(function() { removeLoadingScreen(); }, 10000);
+  </script>
+
+  <!-- Required: Corbado WebAuthn JS bridge for passkeys_web (used by supabase_flutter on web) -->
+  <script
+    src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"
+    type="application/javascript"
+  ></script>
+
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
