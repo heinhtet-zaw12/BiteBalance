@@ -27,8 +27,8 @@ class AnalyticsRemoteDataSourceImpl implements AnalyticsRemoteDataSource {
           .from('food_logs')
           .select()
           .eq('user_id', userId)
-          .gte('created_at', start.toIso8601String())
-          .lt('created_at', end.toIso8601String())
+          .gte('created_at', start.toUtc().toIso8601String())
+          .lt('created_at', end.toUtc().toIso8601String())
           .order('created_at', ascending: false);
 
       return (response as List)

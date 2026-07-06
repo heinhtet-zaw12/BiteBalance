@@ -34,7 +34,7 @@ class FoodLogRemoteDataSourceImpl implements FoodLogRemoteDataSource {
   @override
   Future<List<FoodLogModel>> getDailyLogs(String userId, DateTime date) async {
     try {
-      final startOfDay = DateTime(date.year, date.month, date.day);
+      final startOfDay = DateTime(date.year, date.month, date.day).toUtc();
       final endOfDay = startOfDay.add(const Duration(days: 1));
 
       final response = await client

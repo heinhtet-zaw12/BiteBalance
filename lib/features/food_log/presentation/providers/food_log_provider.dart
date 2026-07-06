@@ -16,6 +16,8 @@ import 'package:bite_balance/features/food_log/domain/usecases/analyze_food.dart
 import 'package:bite_balance/features/food_log/domain/usecases/analyze_food_image.dart';
 import 'package:bite_balance/features/food_log/domain/usecases/get_daily_logs.dart';
 import 'package:bite_balance/features/food_log/domain/usecases/log_food.dart';
+import 'package:bite_balance/features/dashboard/presentation/providers/dashboard_provider.dart';
+import 'package:bite_balance/features/analytics/presentation/providers/analytics_provider.dart';
 
 // Data source providers
 final foodLogRemoteDataSourceProvider = Provider<FoodLogRemoteDataSource>((ref) {
@@ -194,6 +196,14 @@ class FoodLogNotifier extends Notifier<FoodLogState> {
         state = const FoodLogState();
         // Refresh daily logs so the home page updates immediately
         ref.read(dailyLogsProvider.notifier).loadLogs(DateTime.now());
+        // Refresh dashboard so it shows the latest data
+        ref.read(dashboardProvider.notifier).loadSummary();
+        // Refresh analytics stats so they show the latest data
+        ref.read(dailyStatsProvider.notifier).loadStats(DateTime.now());
+        final now = DateTime.now();
+        final weekStart = now.subtract(Duration(days: now.weekday - 1));
+        ref.read(weeklyStatsProvider.notifier).loadStats(weekStart);
+        ref.read(monthlyStatsProvider.notifier).loadStats(now.year, now.month);
         return true;
       },
     );
