@@ -1,7 +1,6 @@
 import 'package:cross_file/cross_file.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:bite_balance/core/utils/error_handler.dart';
 import 'package:bite_balance/features/auth/presentation/providers/auth_provider.dart';
 import 'package:bite_balance/features/food_log/domain/exceptions/invalid_food_exception.dart';
@@ -24,11 +23,15 @@ final foodLogRemoteDataSourceProvider = Provider<FoodLogRemoteDataSource>((ref) 
   return FoodLogRemoteDataSourceImpl(Supabase.instance.client);
 });
 
+const geminiApiKey1 = String.fromEnvironment('GEMINI_API_KEY_1');
+const geminiApiKey2 = String.fromEnvironment('GEMINI_API_KEY_2');
+const geminiApiKey3 = String.fromEnvironment('GEMINI_API_KEY_3');
+
 final geminiClientProvider = Provider<GeminiClient>((ref) {
   return GeminiClient([
-    dotenv.get('GEMINI_API_KEY_1'),
-    dotenv.get('GEMINI_API_KEY_2'),
-    dotenv.get('GEMINI_API_KEY_3'),
+    geminiApiKey1,
+    geminiApiKey2,
+    geminiApiKey3,
   ]);
 });
 
