@@ -102,7 +102,7 @@ class _DashboardPageState extends ConsumerState<DashboardPage>
         },
         icon: const Icon(Icons.add_rounded),
         label: const Text('Log Food'),
-        backgroundColor:  AppTheme.background,
+        backgroundColor:  AppTheme.primary,
       ),
       body: summaryState.when(
         loading: () => const DashboardShimmer(),
