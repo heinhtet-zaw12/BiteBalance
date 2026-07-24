@@ -86,7 +86,8 @@ class ErrorHandler {
     }
     if (msg.contains('user already registered') ||
         msg.contains('already been registered') ||
-        msg.contains('email address is already')) {
+        msg.contains('email address is already') ||
+        msg.contains('already exists')) {
       return 'This email is already registered. Try logging in instead.';
     }
     if (msg.contains('password') && msg.contains('short')) {

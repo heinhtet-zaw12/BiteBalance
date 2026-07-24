@@ -272,8 +272,12 @@ class _RegisterPageState extends ConsumerState<RegisterPage>
                 if (value == null || value.isEmpty) {
                   return 'Please enter your email';
                 }
-                if (!value.contains('@')) {
-                  return 'Please enter a valid email';
+                // Basic email regex: local@domain.tld
+                final emailRegex = RegExp(
+                  r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$',
+                );
+                if (!emailRegex.hasMatch(value.trim())) {
+                  return 'That doesn\'t look like a valid email.';
                 }
                 return null;
               },
