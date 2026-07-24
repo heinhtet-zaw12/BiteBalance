@@ -1,32 +1,56 @@
-# 🥗 Bite Balance
+<div align="center">
+  <img src="assets/images/bite_balance_logo.png" alt="Bite Balance Logo" width="120" />
+  <h1>🥗 Bite Balance</h1>
+  <p><strong>AI-powered calorie tracking &amp; nutrition analysis app</strong></p>
+  <p>
+    <img src="https://img.shields.io/badge/Flutter-3.10+-02569B?logo=flutter" alt="Flutter" />
+    <img src="https://img.shields.io/badge/Dart-3.0+-0175C2?logo=dart" alt="Dart" />
+    <img src="https://img.shields.io/badge/Supabase-3FCF8E?logo=supabase" alt="Supabase" />
+    <img src="https://img.shields.io/badge/Riverpod-4B32C3?logo=flutter" alt="Riverpod" />
+  </p>
+</div>
 
-An AI-powered food tracker Flutter app that helps users log daily meals, analyze nutrition with Gemini AI, and track calorie intake with personalized BMI-based health recommendations.
+---
+
+## 📖 About
+
+**Bite Balance** helps health-conscious individuals track their daily food intake, analyze nutrition with AI, and get personalized health insights based on BMI and eating habits. Snap a photo or type a meal description — the app identifies the food, estimates calories, and classifies it as healthy or junk.
+
+Built with **Clean Architecture** (feature-first) following strict separation of concerns: Domain → Data → Presentation.
 
 ---
 
 ## ✨ Features
 
-- 🔐 Register / Login / Logout
-- 👤 Profile setup — name, weight, height, goal
-- 📊 BMI calculation with category indicator
-- 📝 Log food by text or photo
-- 🤖 AI food analysis — calories, healthy/junk classification
-- 🎯 Personalized daily calorie target based on BMI
-- 📈 Daily calorie dashboard with healthy vs junk breakdown
-- 📅 Weekly & monthly stats with charts
-- 🏆 Most eaten junk food tracking
-- 🌐 Responsive — mobile & web support
+| Feature | Description |
+|---------|------------|
+| 🔐 **Auth** | Register / Login / Logout with Supabase, email confirmation, auth-guarded routes |
+| 👤 **Profile Setup** | Full name, weight, height, fitness goal (lose / maintain / gain) |
+| 📊 **BMI Dashboard** | Local BMI calculation with category labels (Underweight → Obese) and color indicators |
+| 🤖 **AI Food Analysis** | Text or photo-based food recognition via Gemini AI — auto-detects food name, calories, healthy/junk classification |
+| 📝 **Food Logging** | Log meals from camera or gallery; AI populates nutrition fields |
+| 📈 **Analytics** | Daily calorie dashboard with healthy vs. junk breakdown, weekly & monthly stats via `fl_chart` |
+| 🏆 **Junk Food Tracking** | See your most-eaten junk foods at a glance |
+| 🌐 **Cross-Platform** | Built with Flutter — runs on iOS, Android, and web |
+
+---
 
 ## 🛠 Tech Stack
 
 | Technology | Usage |
 |-----------|-------|
-| Flutter + Dart | Mobile & Web UI |
-| Supabase | Auth + Database |
-| Riverpod | State management |
-| GoRouter | Navigation with auth guard |
-| Gemini API | Food analysis + Vision |
-| fl_chart | Analytics charts |
+| **[Flutter](https://flutter.dev)** + **[Dart](https://dart.dev)** | Cross-platform UI framework |
+| **[Supabase](https://supabase.com)** | Auth (email/password) + PostgreSQL database |
+| **[Riverpod](https://riverpod.dev)** (`flutter_riverpod`) | State management with `AsyncNotifier` |
+| **[GoRouter](https://pub.dev/packages/go_router)** | Declarative routing with auth redirect guards |
+| **[Gemini AI](https://ai.google.dev)** (`google_generative_ai`) | Food recognition & nutrition analysis from text/photos |
+| **[fl_chart](https://pub.dev/packages/fl_chart)** | Interactive charts for analytics |
+| **[fpdart](https://pub.dev/packages/fpdart)** | Functional programming helpers (Either, TaskEither) |
+| **[flutter_dotenv](https://pub.dev/packages/flutter_dotenv)** | Environment variable management |
+| **[Google Fonts](https://pub.dev/packages/google_fonts)** | Custom typography |
+| **[Lottie](https://pub.dev/packages/lottie)** | Animated splash & onboarding graphics |
+| **[Shimmer](https://pub.dev/packages/shimmer)** | Loading skeletons |
+| **[image_picker](https://pub.dev/packages/image_picker)** | Camera & gallery access for food photos |
 
 ---
 
@@ -35,115 +59,127 @@ An AI-powered food tracker Flutter app that helps users log daily meals, analyze
 ```
 lib/
 ├── core/
-│   ├── constants/      # Colors, strings, theme
-│   ├── errors/         # Failure classes
-│   ├── router/         # GoRouter config
-│   └── usecases/       # Base usecase class
+│   ├── constants/           # AppColors, AppStrings, AppEndpoints
+│   ├── errors/              # Failure classes
+│   ├── router/              # GoRouter config with auth guard
+│   ├── theme/               # AppTheme (light mode)
+│   ├── usecases/            # Abstract base usecase
+│   └── utils/               # Logger, URL strategy
 │
 ├── features/
-│   ├── auth/           # Register, Login, Logout
+│   ├── auth/                # Register, Login, Logout, Email confirmation
+│   │   ├── data/            # Supabase datasource, UserModel
+│   │   ├── domain/          # User entity, AuthRepository interface
+│   │   └── presentation/    # AuthProvider, LoginPage, RegisterPage, widgets
+│   │
+│   ├── profile/             # Profile setup, BMI calculation
+│   │   ├── data/            # Supabase datasource, ProfileModel
+│   │   ├── domain/          # Profile entity, BMI logic
+│   │   └── presentation/    # ProfileProvider, ProfileSetupPage, HomePage
+│   │
+│   ├── food_log/            # AI food analysis, meal logging
+│   │   ├── data/            # Gemini datasource, FoodLogModel
+│   │   ├── domain/          # FoodLog entity, MealType enum
+│   │   └── presentation/    # FoodLogProvider, FoodLogPage
+│   │
+│   ├── dashboard/           # Daily calorie summary
 │   │   ├── data/
 │   │   ├── domain/
-│   │   └── presentation/
-│   ├── profile/        # Profile setup, BMI
+│   │   └── presentation/    # DashboardPage
+│   │
+│   ├── analytics/           # Weekly & monthly charts
 │   │   ├── data/
 │   │   ├── domain/
-│   │   └── presentation/
-│   ├── food_log/       # Food logging, Gemini analysis
-│   │   ├── data/
-│   │   ├── domain/
-│   │   └── presentation/
-│   └── analytics/      # Daily/weekly/monthly stats
-│       ├── data/
-│       ├── domain/
-│       └── presentation/
+│   │   └── presentation/    # AnalyticsPage
+│   │
+│   ├── splash/              # Animated splash screen
+│   │   └── presentation/    # SplashPage
+│   │
+│   └── main/                # Bottom navigation shell
+│       └── presentation/    # MainScaffold
 │
-└── main.dart
+└── main.dart                # App entry point
 ```
 
 ---
 
 ## 📸 Screenshots
 
+| Login | Home & BMI | Food Log |
+|---|---|---|
+| ![Login](assets/screenshots/Login.png) | ![Home](assets/screenshots/01.png) | ![Food Log](assets/screenshots/log_food.png) |
 
+| Dashboard | Analytics |
+|---|---|
+| ![Dashboard](assets/screenshots/02.png) | ![Analytics](assets/screenshots/daily_analytics.png) |
 
-
-<details>
-<summary>👤 Login , Home and Food analyze (click to expand)</summary>
-
-| Login                                  | Daily Analytics                                            | Log food                                             |
-|----------------------------------------|------------------------------------------------------------|------------------------------------------------------|
-| ![Login](assets/screenshots/Login.png) | ![Daily Analytics](assets/screenshots/daily_analytics.png) | ![Log food](assets/screenshots/log_food.png) 
-
-</details>
-
-
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
-- Flutter SDK 3.0+
-- Dart 3.0+
-- Supabase account
-- Gemini API key
+
+- **Flutter SDK** 3.10+
+- **Dart** 3.0+
+- A **[Supabase](https://supabase.com)** account (free tier works)
+- A **[Gemini API key](https://ai.google.dev)** (free tier available)
 
 ### Installation
 
-**1. Clone the repo**
+**1. Clone the repository**
+
 ```bash
-git clone https://github.com/heinhtet-zaw12/BiteBalance.git
-cd BiteBalance
+git clone https://github.com/heinhtet-zaw12/bite_balance.git
+cd bite_balance
 ```
 
 **2. Install dependencies**
+
 ```bash
 flutter pub get
 ```
 
-**3. Setup environment variables**
+**3. Set up environment variables**
+
+Copy `.env.example` to `.env` and fill in your credentials:
+
 ```bash
 cp .env.example .env
 ```
 
 ```
-SUPABASE_URL=your-supabase-url
-SUPABASE_ANON_KEY=your-anon-key
-GEMINI_API_KEY=your-gemini-key
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-supabase-anon-key
+GEMINI_API_KEY=your-gemini-api-key
 ```
 
-**4. Setup Supabase**
+> ⚠️ Never commit `.env` to version control — it's already in `.gitignore`.
+
+**4. Create the database table**
+
+Run this SQL in your Supabase SQL editor:
 
 ```sql
-create table profiles (
-  id uuid references auth.users primary key,
-  full_name text,
-  weight numeric,
-  height numeric,
-  goal text check (goal in ('lose','maintain','gain')),
-  created_at timestamptz default now()
+CREATE TABLE profiles (
+  id          UUID REFERENCES auth.users PRIMARY KEY,
+  full_name   TEXT,
+  weight      NUMERIC,
+  height      NUMERIC,
+  goal        TEXT CHECK (goal IN ('lose', 'maintain', 'gain')),
+  created_at  TIMESTAMPTZ DEFAULT NOW(),
+  updated_at  TIMESTAMPTZ DEFAULT NOW()
 );
 
-create table food_logs (
-  id uuid default gen_random_uuid() primary key,
-  user_id uuid references auth.users,
-  food_name text,
-  calories numeric,
-  is_junk boolean,
-  meal_type text,
-  created_at timestamptz default now()
-);
+ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 
-alter table profiles enable row level security;
-alter table food_logs enable row level security;
-
-create policy "Users own profile"
-on profiles for all using (auth.uid() = id);
-
-create policy "Users own food logs"
-on food_logs for all using (auth.uid() = user_id);
+CREATE POLICY "Users can only access own profile"
+  ON profiles
+  FOR ALL
+  USING (auth.uid() = id);
 ```
 
 **5. Run the app**
+
 ```bash
 # Mobile
 flutter run
@@ -154,17 +190,49 @@ flutter run -d chrome
 
 ---
 
-## 🤖 Claude Code Setup
+## 🌐 Deployment
 
-This project was built with Claude Code using MCP, Skills, and Agents.
+This project includes a `vercel.json` for easy web deployment via [Vercel](https://vercel.com). Simply connect your repository and Vercel will auto-detect the Flutter web build.
+
+For production builds:
+
+```bash
+flutter build web
+```
+
+---
+
+## 🧱 Architecture Highlights
+
+- **Clean Architecture** with strict dependency rule — Domain layer has zero imports from Flutter or Supabase
+- **Feature-first folder structure** — every feature is self-contained with its own data/domain/presentation layers
+- **Functional error handling** via `fpdart`'s `Either` type — no exceptions thrown from domain or data layers
+- **Auth-guarded routes** — GoRouter redirects unauthenticated users to the login page
+- **All async state** managed through Riverpod `AsyncValue` — loading / error / success states everywhere
+
+---
+
+## 🤖 Built with Claude Code
+
+This project was developed with [Claude Code](https://claude.ai/code) using MCP tools, agents, and workflows.
 
 ```bash
 # Install Claude Code
 npm install -g @anthropic-ai/claude-code
 
 # Run in project folder
-cd BiteBalance
+cd bite_balance
 claude
 ```
 
-MCP config example in `.mcp.json.example` 👆
+---
+
+## 📄 License
+
+This project is for educational and personal use.
+
+---
+
+<div align="center">
+  <sub>Built with ❤️ by <a href="https://github.com/heinhtet-zaw12">@heinhtet-zaw12</a></sub>
+</div>
