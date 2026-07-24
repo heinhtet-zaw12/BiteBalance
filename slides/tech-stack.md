@@ -54,19 +54,19 @@ transition: fade
 <!-- slide 4 -->
 # Methodology
 
-**Development Workflow & AI-Assisted Practices**
+**Superpower-Driven Development Workflow**
 
-- **Clean Architecture (strictly enforced):** Domain layer is pure Dart with zero external imports. Data layer handles all Supabase/Gemini calls. Presentation uses Riverpod `AsyncValue` for loading/error/success states.
+- **Superpowers Plugin:** The entire workflow is orchestrated by the `superpowers@claude-plugins-official` plugin (enabled in `.claude/settings.json`). It manages the interplay between specialized agents, custom skills, and MCP servers — turning Claude Code into a purpose-built AI development team for this project.
 
-- **Version-Gated Development:** V1 (auth, profile, BMI) → V2 (food logging, daily dashboard) → V3 (Gemini Vision AI, charts, recommendations). Each agent/Skill enforces the version boundary.
+- **Agent-as-Teammate Architecture:** Instead of one monolithic prompt, this project defines 4 specialized subagents (V1 dev, V3 Gemini dev, UI designer, error handler). Each has pinned context, version scope, color coding, and persistent agent memory — so the right specialist handles the right task without context bleed.
 
-- **MCP Integration:** Supabase MCP for database management + Context7 MCP for latest Flutter/Supabase documentation lookups.
+- **Skill-as-Playbook System:** Reusable skill files (`.claude/skills/`) encode expert playbooks for Supabase, Flutter, and UI/UX design. Invoked via slash commands (`/skill-name`), they inject latest best practices without manual research — especially critical for Supabase RLS policies and Flutter state management.
 
-- **AI Prompt Engineering:** Structured agent descriptions with `model: inherit`, `color` coding, and `memory: project`. Each agent has exhaustive `<example>` blocks for context-aware invocation.
+- **MCP-as-Toolbelt:** Supabase MCP provides direct database operations (SQL execution, migration management, log inspection) and Context7 MCP supplies up-to-date API documentation — all accessed on demand within the coding flow, eliminating context-switching to browser tabs.
 
-- **Persistent Agent Memory:** Each agent maintains its own memory directory under `.claude/agent-memory/` for cross-session institutional knowledge.
+- **Orchestration Flow:** User request → Superpowers plugin resolves intent → routes to the appropriate agent (via `Agent` tool) with relevant skill loaded and MCP tools available → agent executes with Clean Architecture enforcement → result reviewed, committed, pushed — all within a single session.
 
-- **Error-First Development:** Centralized `Failure` class hierarchy, error code mapping table, SnackBar-based user feedback, never raw exceptions in UI.
+- **Version-Gated Execution:** Superpowers enforces the V1→V2→V3 roadmap at the agent level. `bite-balance-v1-developer` rejects V2/V3 requests outright; `v3-gemini-food-dev` only activates for authorized V3 work. No scope creep, no accidental feature sprawl.
 
 ---
 
