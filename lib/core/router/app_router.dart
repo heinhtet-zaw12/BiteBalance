@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import 'package:bite_balance/core/analytics/goatcounter_tracker.dart';
 import 'package:bite_balance/features/analytics/presentation/pages/analytics_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/email_confirmation_page.dart';
 import 'package:bite_balance/features/auth/presentation/pages/login_page.dart';
@@ -51,6 +52,9 @@ GoRouter createRouter(Ref ref) {
       if (isLoggedIn && _authRoutes.contains(location)) {
         return '/home';
       }
+
+      // Track page view in GoatCounter (only on accepted/non-redirected routes)
+      GoatCounterTracker.trackPageView(location);
 
       return null;
     },

@@ -111,6 +111,19 @@
     setTimeout(function() { removeLoadingScreen(); }, 10000);
   </script>
 
+  <!-- GoatCounter Analytics — privacy-first, no cookies -->
+  <script data-goatcounter="https://heinhtet-zaw.goatcounter.com/count"
+          async src="//gc.zgo.at/count.js"></script>
+
+  <!-- SPA page view tracking helper — called from Dart -->
+  <script>
+    function trackGoatCounter(path) {
+      if (window.goatcounter && window.goatcounter.count) {
+        window.goatcounter.count({ path: path });
+      }
+    }
+  </script>
+
   <!-- Required: Corbado WebAuthn JS bridge for passkeys_web (used by supabase_flutter on web) -->
   <script
     src="https://github.com/corbado/flutter-passkeys/releases/download/2.4.0/bundle.js"
